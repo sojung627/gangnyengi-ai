@@ -59,7 +59,7 @@ print("검사 완료 대상자: ", len(df)) # 검사 완료된 대상자가 몇 
 # GR + PD = CAL
 cal_cols = [
   col for col in df.columns # df의 컬럼이 조건에 해당하면 col에 담겠다
-  if re.fullmatch(r"OHX\d{2}\LA[DSPA]", col) # re.fullmatch() = 문자열 전체가 정규표현식과 일치하라
+  if re.fullmatch(r"OHX\d{2}LA[DSPA]", col) # re.fullmatch() = 문자열 전체가 정규표현식과 일치하라
 ]                                            # OHX = OHX로 시작하라
                                              # \d  = 0~9 숫자 한자리
                                              # {2} = 앞의 숫자가 정확히 두번 반복하라
@@ -69,7 +69,7 @@ cal_cols = [
 # 치주낭 깊이 
 pd_cols = [
   col for col in df.columns # df의 컬럼이 조건에 해당하면 col에 담겠다
-  if re.fullmatch(r"OHX\d{2}\PC[DSPA]", col) # re.fullmatch() = 문자열 전체가 정규표현식과 일치해라
+  if re.fullmatch(r"OHX\d{2}PC[DSPA]", col) # re.fullmatch() = 문자열 전체가 정규표현식과 일치해라
 ]                                            # OHX = OHX로 시작하라
                                              # \d  = 0~9 숫자 한자리
                                              # {2} = 앞의 숫자가 정확히 두번 반복하라
@@ -132,7 +132,7 @@ for tooth in sorted({site[:2] for site in cal_sites}): # sorted() = 오름차순
     cal_data[site_cols] >= 3 # CAL이 3mm 이상이면 True
   ).any(axis=1) # .any() = 하나라도 만족하면 True
                 # axis=1 = 행 기준으로 반환
-                # axis=2 = 열 기준으로 반환
+                # axis=0 = 열 기준으로 반환
 
 # 치아 2개 이상에서 CAL이 3mm 이상인 것 확인
 cal_positive = affected_teeth.sum(axis=1) >= 2 # cal_positive   = CAL 조건 해당하는 대상자인지 확인
