@@ -163,8 +163,40 @@ print("라벨 생성 후 데이터 크기: ", df.shape) # df.shape = DF의 행�
 print(df["target"].value_counts())
 print(df["target"].value_counts(normalize=True) * 100) # .value_counts() = 각 값이 몇번 나왔는가
                                                        # nomalize=True   = 등장 횟수 대비 비율로 변환
-                                                       # nomalize=False  = 
+                                                       # nomalize=False  = 등장 횟수 
                                                        # * 100 = 백분율로 변환
 
 # 5. 모델에 사용할 입력 변수 선택 ------------------------------------------------------------------------------------
 
+# 사용할 입력 변수
+FEATURES = [
+  "RIDAGEYR",
+  "RIAGENDR",
+  "SMQ020",
+  "SMQ040"
+]
+
+X = df[FEATURES].copy()
+Y = df["target"].copy()
+
+# 흡연 설문 응답 거부 or 모름 코드 처리
+for col in ["SMQ020", "SMQ040"]:
+  X[col] = X[col].replace({
+    7: np.nan,
+    9: np.nan
+  })
+
+# 범주형 변수는 숫자 크기 말고 범주형으로 취급하라
+categorical_features = [
+  "RIAGENDR",
+  "SMQQ020",
+  "SMQ040"
+]  
+
+numeric_features = ["RIDAGEYR"]
+
+print("입력 데이터: ", X.shape)
+print("정답데이터: ", Y.shape)
+print(X.head())
+
+# 6. 학습데이터 / 검증데이터 / 테스트데이터 분리 ----------------------------------------------------------------------
