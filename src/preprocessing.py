@@ -290,34 +290,37 @@ print("전처리 후 Test: ", X_test_processed.shape)
 # 8. 전처리 결과 저장 ----------------------------------------------------------------------------------------------
 
 # ML DL 공통 학습 데이터 저장
-np.savez_compressed(
-  PROCESSED / "train_data.npz",
+np.savez_compressed( # .savez_compressed() = NumPy 압축 파일 만드는 함수
+  PROCESSED / "train_data.npz", # C:\projects\projectAI\GangNaengI_AI\data\processed\train_data.npz
   X=X_train_processed,
-  y=y_train.to_numpy()
+  y=y_train.to_numpy() # Pandas를 NumPy로 변환
 )
 
-np.savez_compressed(
-  PROCESSED / "val_data.npz",
+np.savez_compressed( # .savez_compressed() = NumPy 압축 파일 만드는 함수
+  PROCESSED / "val_data.npz", # C:\projects\projectAI\GangNaengI_AI\data\processed\val_data.npz
   X=X_val_processed,
-  y=y_val.to_numpy()
+  y=y_val.to_numpy() # Pandas를 NumPy로 변환
 )
 
-np.savez_compressed(
-  PROCESSED / "test_data.npz",
+np.savez_compressed( # .savez_compressed() = NumPy 압축 파일 만드는 함수
+  PROCESSED / "test_data.npz", # C:\projects\projectAI\GangNaengI_AI\data\processed\test_data.npz
   X=X_test_processed,
-  y=y_test.to_numpy()
+  y=y_test.to_numpy() # Pandas를 NumPy로 변환
 )
 
 # API에서도 동일한 전처리 사용하라(저장)
-joblib.dump(
+joblib.dump( # joblib  = 파이썬 객체를 파일로 저장 or 불러오기
+             # .dump() = 파이썬 객체를 직렬화 
+             # 직렬화: 객체를 파일로 저장할 수 있는 형태로 변환
   preprocessor,
-  MODELS / "preprocessor.jolib"
+  MODELS / "preprocessor.joblib" # C:\projects\projectAI\GangNaengI_AI\models\preprocessor.joblib
 )
 
 # 분석 및 추적용 라벨 데이터
-df[["SEQN", "target"]].to_csv(
-  PROCESSED / "labels.csv",
-  index=False
+df[["SEQN", "target"]].to_csv( # [[]]    = 두개의 컬럼만 선택
+                               # .to_csv = DF를 CSV로 저장
+  PROCESSED / "labels.csv", # C:\projects\projectAI\GangNaengI_AI\data\processed\labels.csv
+  index=False # 행 인덱스는 csv 파일에 저장하지 마라
 )
 
 print("day02 - 데이터 전처리 및 학습데이터 구축")
