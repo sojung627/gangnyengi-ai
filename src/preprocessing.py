@@ -12,6 +12,8 @@ from sklearn.compose import ColumnTransformer # sklearn.compose   = 여러 데�
                                               # ColumnTransformer = 데이터의 컬럼마다 서로 다른 전처리 적용하는 클래스
 from sklearn.pipeline import Pipeline # sklearn.pipeline = 데이터 처리 단계를 순서대로 하는 모듈 
                                       # Pipeline = 전처리부터 모델 학습 까지 연결하는 클래스
+from sklearn.impute import SimpleImputer # sklearn.impute = 결측치 처리 모듈
+                                         # SimpleImputer  = 결측치를 평균값 or 중앙값 or 최빈값으로 대체(결측치 단순대치법)                                       
 from sklearn.preprocessing import ( # sklearn.preprocessing = ML용 데이터 전처리하는 모듈
   OneHotEncoder,                    # OneHotEncoder  = 범주형 데이터를 0과 1로 변환하는 클래스(이진법용) 
   StandardScaler                    # StandardScaler = 데이터 평균을 0으로 맞추고 표준편차를 1로 만드는 클래스(표준화용)
@@ -197,7 +199,7 @@ categorical_features = [
 numeric_features = ["RIDAGEYR"] # numeric_features = 수치형 변수들 저장하는 변수
 
 print("입력 데이터: ", X.shape) # .shape = 데이터 크기 나타내는 속성
-print("정답데이터: ", Y.shape)  # X는 행과 열이 나타남(튜플) 
+print("정답데이터: ", y.shape)  # X는 행과 열이 나타남(튜플) 
                                # Y는 행만 나타남(Series)
 print(X.head())                # head() = 5개만 출력
 
@@ -236,6 +238,47 @@ assert set(X_train.index).isdisjoint(X_val.index) # assert = 조건 검사 후 F
 assert set(X_train.index).isdisjoint(X_test.index)# .index = DF 행 인덱스
 assert set(X_val.index).isdisjoint(X_test.index)  # .isdisjoint() = 두 집합에 공통 요소가 없는지 확인하는 메서드
 
-# 7. 결측치 처리 인코딩 및 스케일링 ----------------------------------------------------------------------------------
+# 7. [전처리] - 결측치 처리 인코딩 및 스케일링 ----------------------------------------------------------------------
 
 # 숫자형 - 결측값을 중앙값으로 대체 후 표준화
+numeric_pipeline = Pipeline([
+  ("imputer", SimpleImputer(strategy="median")),
+  ("scaler", StandardScaler())
+])
+
+# 범주형 - 결측값을 별도 범주로 처리 후 원핫 인코딩
+categorical_pipeline = Pipeline([
+  (
+    "imputer",
+    SimpleImputer(
+      strategy="constand",
+      fill_value=1
+    )
+  ),
+  (
+    "onehot",
+    OneHotEncoder(
+      handle_unknown="ignore",
+      sparse_output=False
+    )
+  )
+])
+
+preprocessor = ColumnTransformer([
+  ("numeric", numeric_pipeline, numeric_features),
+  ("categorical", categorical_pipeline, categorical_features)
+]) 
+
+# 학습데이터만 fit
+X_train_processed = preprocessor.fit_transform(X_train)
+
+# 검증 or 테스트데이터는 transform만 실행
+X_val_processed = preprocessor.transform(X_val)
+X_test_processed = preprocessor.transform(X_test)
+
+print("전처리 후 Train: ", X_train_processed.shape)
+print("전처리 후 Validation: ", X_val_processed.shape)
+print("전처리 후 Test: ", X_test_processed.shape)
+
+# 8. 전처리 결과 저장 ----------------------------------------------------------------------------------------------
+
