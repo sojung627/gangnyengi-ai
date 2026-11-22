@@ -177,7 +177,7 @@ FEATURES = [
 ]
 
 X = df[FEATURES].copy() # X = ML모델 입력데이터 저장 | DF 타입
-Y = df["target"].copy() # Y = ML모델 정답데이터 저장 | Series 타입
+y = df["target"].copy() # Y = ML모델 정답데이터 저장 | Series 타입
                         # .copy() = 복사본
 
 # 흡연 설문 응답 거부 or 모름 코드 처리
@@ -202,3 +202,40 @@ print("정답데이터: ", Y.shape)  # X는 행과 열이 나타남(튜플)
 print(X.head())                # head() = 5개만 출력
 
 # 6. 학습데이터 / 검증데이터 / 테스트데이터 분리 ----------------------------------------------------------------------
+
+# 학습데이터 70 / 임시데이터 30으로 분리
+# X_train = 모델 학습에 사용할 입력 데이터 저장용 변수
+# X_temp  = 검증데이터와 테스트데이터 저장용 임시 변수
+# y_train = 학습데이터 정답 라벨 저장 변수
+# y_temp  = 임시데이터 정답 라벨 저장 변수
+X_train, X_temp, y_train, y_temp = train_test_split(
+  X, y,
+  test_size=0.30, # 임시데이터=30%
+  random_state=42,# 무작위 분할 난수 시드 --> 42
+  stratify=y      # 데이터 비율 유지하며 분리하는 매개변수 --> 모든 데이터 정답라벨=y
+)
+
+# 나머지 30을 반반으로(15 / 15)
+# X_val  = 검증용 입력데이터 저장용 변수
+# X_test = 테스트용 입력데이터 저장용 변수
+# y_val  = 검증용 데이터 정답 라벨 저장용 변수
+# y_test = 테스트용 데이터 정답 라벨 저장용 변수
+X_val, X_test, y_val, y_test = train_test_split(
+  X_temp, y_temp,
+  test_size=0.50, # 두번째 데이터는 50%
+  random_state=42,# 무작위 분할 난수 시드 --> 42
+  stratify=y_temp # 데이터 비율 유지하며 분리하는 매개변수
+)                 # 임시 데이터 포함된 치주라벨을 0과 1로 유지하며 검증용 / 테스트용으로 분리
+
+print("Train: ", X_train.shape) # .shape = DF의 행과 열 개수 반환
+print("Validation: ", X_val.shape)
+print("Test: ", X_test.shape)
+
+# 참가자 서로 겹치는지 확인
+assert set(X_train.index).isdisjoint(X_val.index) # assert = 조건 검사 후 False면 AssertionError
+assert set(X_train.index).isdisjoint(X_test.index)# .index = DF 행 인덱스
+assert set(X_val.index).isdisjoint(X_test.index)  # .isdisjoint() = 두 집합에 공통 요소가 없는지 확인하는 메서드
+
+# 7. 결측치 처리 인코딩 및 스케일링 ----------------------------------------------------------------------------------
+
+# 숫자형 - 결측값을 중앙값으로 대체 후 표준화
