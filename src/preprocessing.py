@@ -241,44 +241,83 @@ assert set(X_val.index).isdisjoint(X_test.index)  # .isdisjoint() = 두 집합�
 # 7. [전처리] - 결측치 처리 인코딩 및 스케일링 ----------------------------------------------------------------------
 
 # 숫자형 - 결측값을 중앙값으로 대체 후 표준화
-numeric_pipeline = Pipeline([
-  ("imputer", SimpleImputer(strategy="median")),
-  ("scaler", StandardScaler())
+# 해석: 숫자형 데이터 전처리 파이프라인
+numeric_pipeline = Pipeline([ # Pipeline() = 데이터들 순서대로 처리하는 클래스 
+  ("imputer", SimpleImputer(strategy="median")), # SimpleImputer()   = 결측값 대체(평균값 / 중앙값 / 최빈값)
+                                                 # strategy="median" = 중앙값으로 대체하라
+  ("scaler", StandardScaler()) # StandardScaler() = 평균이 0 표준편차 1로 하라(표준화) ex) Z-score
 ])
 
 # 범주형 - 결측값을 별도 범주로 처리 후 원핫 인코딩
-categorical_pipeline = Pipeline([
+# 해석: 범주형 데이터 전처리 파이프라인 
+categorical_pipeline = Pipeline([ # Pipeline() = 데이터들을 순서대로 처리하는 클래스
   (
-    "imputer",
-    SimpleImputer(
-      strategy="constand",
-      fill_value=1
+    "imputer", 
+    SimpleImputer( # 결측값 대체(평균값 / 중앙값 / 최빈값)
+      strategy="constant", # 결측값을 지정된 고정값으로 수정하라
+      fill_value=-1         # 결측값을 -1로 대체 하라
     )
   ),
   (
     "onehot",
-    OneHotEncoder(
-      handle_unknown="ignore",
-      sparse_output=False
-    )
+    OneHotEncoder( # OneHotEncoder() = 0과 1인 컬럼으로 바꿔라(이진법)
+      handle_unknown="ignore", # handle_unknown = 학습할 때 없던 새 범주가 들어오면 어떻게 처리할 지 정하는 매개변수
+                               # ignore = 새 범주 와도 오류내지마
+      sparse_output=False # sparse_output() = 원핫 인코딩 결과를 희소 행렬로 반환할 것인가
+    )                     # False = 안한다(일반 NumPy 배열로 저장)
   )
 ])
 
-preprocessor = ColumnTransformer([
-  ("numeric", numeric_pipeline, numeric_features),
-  ("categorical", categorical_pipeline, categorical_features)
+# 숫자형 + 범주형 데이터 전처리 과정 둘다 저장
+preprocessor = ColumnTransformer([ # ColumnTransformer() = 컬럼 종류에 따라 각 다르게 전처리 하라
+  ("numeric", numeric_pipeline, numeric_features), # 숫자는 아까 정한대로 전처리 하라(중앙값 대체)
+  ("categorical", categorical_pipeline, categorical_features) # 범주형은 아까 정한대로 해라(1로 대체)
 ]) 
 
 # 학습데이터만 fit
-X_train_processed = preprocessor.fit_transform(X_train)
+X_train_processed = preprocessor.fit_transform(X_train) # X_train_processed = 전처리 완료된 학습데이터
+                                                        # .fit_transform()  = 전처리 해야할 값 학습 후 변환하는 메서드
 
 # 검증 or 테스트데이터는 transform만 실행
-X_val_processed = preprocessor.transform(X_val)
-X_test_processed = preprocessor.transform(X_test)
+X_val_processed = preprocessor.transform(X_val)   # X_val_processed  = 전처리 완료된 검증데이터
+X_test_processed = preprocessor.transform(X_test) # X_test_processed = 전처리 완료된 테스트데이터
+                                                  # .transform() = 이미 학습한 데이터 변환 메서드
 
-print("전처리 후 Train: ", X_train_processed.shape)
+print("전처리 후 Train: ", X_train_processed.shape) # .shape = 행과 열을 튜플로 반환
 print("전처리 후 Validation: ", X_val_processed.shape)
 print("전처리 후 Test: ", X_test_processed.shape)
 
 # 8. 전처리 결과 저장 ----------------------------------------------------------------------------------------------
 
+# ML DL 공통 학습 데이터 저장
+np.savez_compressed(
+  PROCESSED / "train_data.npz",
+  X=X_train_processed,
+  y=y_train.to_numpy()
+)
+
+np.savez_compressed(
+  PROCESSED / "val_data.npz",
+  X=X_val_processed,
+  y=y_val.to_numpy()
+)
+
+np.savez_compressed(
+  PROCESSED / "test_data.npz",
+  X=X_test_processed,
+  y=y_test.to_numpy()
+)
+
+# API에서도 동일한 전처리 사용하라(저장)
+joblib.dump(
+  preprocessor,
+  MODELS / "preprocessor.jolib"
+)
+
+# 분석 및 추적용 라벨 데이터
+df[["SEQN", "target"]].to_csv(
+  PROCESSED / "labels.csv",
+  index=False
+)
+
+print("day02 - 데이터 전처리 및 학습데이터 구축")
