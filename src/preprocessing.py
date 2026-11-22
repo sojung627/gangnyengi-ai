@@ -53,19 +53,81 @@ print("검사 완료 대상자: ", len(df)) # 검사 완료된 대상자가 몇 
 # D(원심협면) / S(근심협면) / P(원심설면) / A(근심설면)
 
 # 임상적 부착 소실
+# 치은퇴축 + 치주낭 깊이 = 임상적 부착 소실
+# GR + PD = CAL
 cal_cols = [
-  col for col in df.columns
-  if re.fullmatch(r"OHX\d{2}\LA[DSPA]", col)
-]
+  col for col in df.columns # df의 컬럼이 조건에 해당하면 col에 담겠다
+  if re.fullmatch(r"OHX\d{2}\LA[DSPA]", col) # re.fullmatch() = 문자열 전체가 정규표현식과 일치하라
+]                                            # OHX = OHX로 시작하라
+                                             # \d  = 0~9 숫자 한자리
+                                             # {2} = 앞의 숫자가 정확히 두번 반복하라
+                                             # \LA  = 숫자 다음은 LA라는 문자열
+                                             # [DSPA] = D S P A 중 하나 포함
 
 # 치주낭 깊이 
 pd_cols = [
-  col for col in df.columns
-  if re.fullmatch(r"OHX\d{2}\PC[DSPA]", col)
-]
+  col for col in df.columns # df의 컬럼이 조건에 해당하면 col에 담겠다
+  if re.fullmatch(r"OHX\d{2}\PC[DSPA]", col) # re.fullmatch() = 문자열 전체가 정규표현식과 일치해라
+]                                            # OHX = OHX로 시작하라
+                                             # \d  = 0~9 숫자 한자리
+                                             # {2} = 앞의 숫자가 정확히 두번 반복하라
+                                             # \PC  = 숫자 다음은 PC라는 문자열
+                                             # [DSPA] = D S P A 중 하나 포함                                             
 
-print("CAL 컬럼 개수: ", len(cal_cols)) 
-print("PD 컬럼 개수: ", len(pd_cols))
+print("CAL 컬럼 개수: ", len(cal_cols)) # CAL 컬럼 개수
+print("PD 컬럼 개수: ", len(pd_cols))   # PD  컬럼 개수
 
-assert len(cal_cols) > 0
-assert len(cal_cols) == len((pd_cols))
+assert len(cal_cols) > 0 # assert = 조건이 참이면 검사 / 거짓이면 AssertonError
+                         # CAL컬럼 1개 이상이면 검사하라
+assert len(cal_cols) == len((pd_cols)) # cal컬럼과 pd컬럼의 개수가 같다면 검사하라
+
+# 숫자형으로 변환
+cal_data = df[cal_cols].apply(pd.to_numeric, errors="coerce") # .apply = 각 컬럼에 함수를 적용하는 메서드
+pd_data = df[pd_cols].apply(pd.to_numeric, errors="coerce")   # pd.to_numric    = 숫자형 데이터로 변환
+                                                              # errors="coerce" = 숫자 변환 불가 값은 결측치로 처리 
+
+# xpt파일의 이상치(매우 작은 것들)는 0으로 처리
+cal_data = cal_data.mask(cal_data.abs() < 1e-70, 0) # .mask() = 조건이 참인 값을 지정된 값으로 변경(매우작은 숫자를 0으로)
+pd_data = pd_data.mask(pd_data.abs() < 1e-70, 0)    # .abs()  = CAL 데이터의 절댓값을 구하는 메서드
+                                                    # 절댓값: 0에서 얼마나 떨어졌는가
+                                                    # ex) -5의 절댓값은 5 / 10의 절댓값은 10
+
+# 음수나 99 등 이상치 밖의 값 제외 시키기
+cal_data = cal_data.where(cal_data.between(0, 20)) # .where()   = 조건에 맞는 값은 유지, 아닌 값은 결측치로 변경
+pd_data = pd_data.where(pd_data.between(0, 20))    # .between() = A ~ B인가 --> 0~20 사이인가 
+
+# 4. 치주질환 관련 라벨 생성 -----------------------------------------------------------------------------------------
+
+# CAL컬럼과 치아 정보 연결
+cal_sites = {
+  col[3:5] + col[-1]: col
+  for col in cal_cols
+}
+
+# PD컬럼과 치아 정보 연결
+pd_sites = {
+  col[3:5] + col[-1]: col
+  for col in pd_cols
+}
+
+# CAL 3mm 이상인 치아 확인
+affected_teeth = pd.DataFrame(index=df.index)
+
+for tooth in sorted({site[:2] for site in cal_cols}):
+  site_cols = [
+    cal_sites[site]
+    for site in cal_sites
+    if site.startswith(tooth)
+  ]
+
+  affected_teeth[tooth] = (
+    cal_data[site_cols] >= 3
+  ).any(axis=1)
+
+# 치아 2개 이상에서 CAL이 3mm 이상인 것 확인
+cal_positive = affected_teeth.sum(axis=1) >= 2
+
+# 인접면 PD 4mm 이상인 부위 있는지 확인
+pd_positive = (pd_data >= 4).any(axis=1)
+
+# 평가 가능한 측정값 있는 대상자만 유지하라
