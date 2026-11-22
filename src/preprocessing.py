@@ -48,3 +48,24 @@ print("검사 완료 대상자: ", len(df)) # 검사 완료된 대상자가 몇 
 
 # 3. CAL과 PD 컬럼의 특수 코드 처리 ---------------------------------------------------------------------------------
 
+# 치주검사 - 인접면 측정 컬럼
+# 인접면   - D S P A
+# D(원심협면) / S(근심협면) / P(원심설면) / A(근심설면)
+
+# 임상적 부착 소실
+cal_cols = [
+  col for col in df.columns
+  if re.fullmatch(r"OHX\d{2}\LA[DSPA]", col)
+]
+
+# 치주낭 깊이 
+pd_cols = [
+  col for col in df.columns
+  if re.fullmatch(r"OHX\d{2}\PC[DSPA]", col)
+]
+
+print("CAL 컬럼 개수: ", len(cal_cols)) 
+print("PD 컬럼 개수: ", len(pd_cols))
+
+assert len(cal_cols) > 0
+assert len(cal_cols) == len((pd_cols))
