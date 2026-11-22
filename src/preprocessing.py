@@ -170,33 +170,35 @@ print(df["target"].value_counts(normalize=True) * 100) # .value_counts() = 각 �
 
 # 사용할 입력 변수
 FEATURES = [
-  "RIDAGEYR",
-  "RIAGENDR",
-  "SMQ020",
-  "SMQ040"
+  "RIDAGEYR", # 참가자의 나이(연도)
+  "RIAGENDR", # 참가자의 성별
+  "SMQ020",   # 평생 담배 100개비 이상 피었는가
+  "SMQ040"    # 현재 흡연 빈도 ex) 요즘은 자주 피는가
 ]
 
-X = df[FEATURES].copy()
-Y = df["target"].copy()
+X = df[FEATURES].copy() # X = ML모델 입력데이터 저장 | DF 타입
+Y = df["target"].copy() # Y = ML모델 정답데이터 저장 | Series 타입
+                        # .copy() = 복사본
 
 # 흡연 설문 응답 거부 or 모름 코드 처리
 for col in ["SMQ020", "SMQ040"]:
-  X[col] = X[col].replace({
-    7: np.nan,
-    9: np.nan
+  X[col] = X[col].replace({ # .replace() = 지정한 값을 다른 값으로 변경하는 메서드
+    7: np.nan, # 7을 결측치로 저장
+    9: np.nan  # 9를 결측치로 저장
   })
 
 # 범주형 변수는 숫자 크기 말고 범주형으로 취급하라
 categorical_features = [
-  "RIAGENDR",
-  "SMQQ020",
-  "SMQ040"
+  "RIAGENDR", # 참가자의 나이(연도)
+  "SMQ020",   # 평생 담배 100개비 이상 피었는가
+  "SMQ040"    # 현재 흡연 빈도 ex) 요즘은 자주 피는가
 ]  
 
-numeric_features = ["RIDAGEYR"]
+numeric_features = ["RIDAGEYR"] # numeric_features = 수치형 변수들 저장하는 변수
 
-print("입력 데이터: ", X.shape)
-print("정답데이터: ", Y.shape)
-print(X.head())
+print("입력 데이터: ", X.shape) # .shape = 데이터 크기 나타내는 속성
+print("정답데이터: ", Y.shape)  # X는 행과 열이 나타남(튜플) 
+                               # Y는 행만 나타남(Series)
+print(X.head())                # head() = 5개만 출력
 
 # 6. 학습데이터 / 검증데이터 / 테스트데이터 분리 ----------------------------------------------------------------------
