@@ -43,7 +43,7 @@ print("원본 데이터 크기: ", df.shape) # df.shape = df의 행과 열을 �
 # 2. 치주검사 완료 대상자 선택 ---------------------------------------------------------------------------------------
 
 # 치주검사 완료된 참가자만 선택
-df = df[df["OHPDSTS"] == 1].copy() # 검사 완료된 상태 == 1
+df = df[df["OHDPDSTS"] == 1].copy() # 검사 완료된 상태 == 1
                                    # 검사 완료된 대상자만 따로 복사해서 df에 담아라
 
 print("검사 완료 대상자: ", len(df)) # 검사 완료된 대상자가 몇 명인가
@@ -95,8 +95,8 @@ pd_data = pd_data.mask(pd_data.abs() < 1e-70, 0)    # .abs()  = CAL 데이터의
                                                     # ex) -5의 절댓값은 5 / 10의 절댓값은 10
 
 # 음수나 99 등 이상치 밖의 값 제외 시키기
-cal_data = cal_data.where(cal_data.between(0, 20)) # .where()   = 조건에 맞는 값은 유지, 아닌 값은 결측치로 변경
-pd_data = pd_data.where(pd_data.between(0, 20))    # .between() = A ~ B인가 --> 0~20 사이인가 
+cal_data = cal_data.where((cal_data >= 0) & (cal_data <= 20)) # .where() = 조건에 맞는 값은 유지, 아닌 값은 결측치로 변경
+pd_data = pd_data.where((pd_data >= 0) & (pd_data <= 20))    
 
 # 4. 치주질환 관련 라벨 생성 -----------------------------------------------------------------------------------------
 
@@ -178,6 +178,11 @@ FEATURES = [
   "SMQ040"    # 현재 흡연 빈도 ex) 요즘은 자주 피는가
 ]
 
+# 테스트로 임시 추가(삭제 예정)
+print("공주님께서 확인 중 입니다")
+print("흡연 관련 컬럼:", [col for col in df.columns if col.startswith("SMQ")])
+print("누락된 컬럼:", [col for col in FEATURES if col not in df.columns])
+
 X = df[FEATURES].copy() # X = ML모델 입력데이터 저장 | DF 타입
 y = df["target"].copy() # Y = ML모델 정답데이터 저장 | Series 타입
                         # .copy() = 복사본
@@ -200,7 +205,7 @@ numeric_features = ["RIDAGEYR"] # numeric_features = 수치형 변수들 저장�
 
 print("입력 데이터: ", X.shape) # .shape = 데이터 크기 나타내는 속성
 print("정답데이터: ", y.shape)  # X는 행과 열이 나타남(튜플) 
-                               # Y는 행만 나타남(Series)
+                               # y는 행만 나타남(Series)
 print(X.head())                # head() = 5개만 출력
 
 # 6. 학습데이터 / 검증데이터 / 테스트데이터 분리 ----------------------------------------------------------------------
