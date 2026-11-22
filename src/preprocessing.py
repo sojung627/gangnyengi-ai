@@ -99,35 +99,72 @@ pd_data = pd_data.where(pd_data.between(0, 20))    # .between() = A ~ B인가 --
 # 4. 치주질환 관련 라벨 생성 -----------------------------------------------------------------------------------------
 
 # CAL컬럼과 치아 정보 연결
-cal_sites = {
-  col[3:5] + col[-1]: col
-  for col in cal_cols
-}
+# cal_site{} = 치아번호 + 측정위치를 CAL컬럼에 연결하여 저장할 딕셔너리
+cal_sites = { 
+  col[3:5] + col[-1]: col # col[3:5] = 인덱스 3~4까지 문자 추출
+  for col in cal_cols     # col[-1]  = 인덱스 마지막 문자 추출
+}                         # ex) OHX11LAD --> 11D
+                          # for문: col에 담은 것들 cal_cols에 담을거다
 
 # PD컬럼과 치아 정보 연결
+# pd_sites{} = 컬럼명 중 치아번호만 추출
 pd_sites = {
-  col[3:5] + col[-1]: col
-  for col in pd_cols
-}
+  col[3:5] + col[-1]: col # col[3-5] = 인덱스 3~4까지 문자 추출
+  for col in pd_cols      # col[-1]  = 인덱스 마지막 문자 추출
+}                         # for문: col에 담은 것들 pd_cols에 담을거다
 
 # CAL 3mm 이상인 치아 확인
-affected_teeth = pd.DataFrame(index=df.index)
+affected_teeth = pd.DataFrame(index=df.index) # index    = DF의 인덱스 지정하는 매개변수
+                                              # df.index = 기존 DF 행의 인덱스
+                                              # 즉 affected_teeth의 index는 df.index이다
 
-for tooth in sorted({site[:2] for site in cal_cols}):
+for tooth in sorted({site[:2] for site in cal_sites}): # sorted() = 오름차순
+                                                       # site[:2] = 두번째 문자열 까지(중복 x)
   site_cols = [
-    cal_sites[site]
-    for site in cal_sites
-    if site.startswith(tooth)
-  ]
+    cal_sites[site]       # key로 [site] 가져와야 함
+    for site in cal_sites # ex) site="11D" --> 가져오는 것: OHX11LAD
+    if site.startswith(tooth) # .startswith() = 문자열이 특정 문자로 시작하는지 검사하는 메서드
+  ]                           # ex) stie="11D" 인데 tooth="11" 이라면 True
 
   affected_teeth[tooth] = (
-    cal_data[site_cols] >= 3
-  ).any(axis=1)
+    cal_data[site_cols] >= 3 # CAL이 3mm 이상이면 True
+  ).any(axis=1) # .any() = 하나라도 만족하면 True
+                # axis=1 = 행 기준으로 반환
+                # axis=2 = 열 기준으로 반환
 
 # 치아 2개 이상에서 CAL이 3mm 이상인 것 확인
-cal_positive = affected_teeth.sum(axis=1) >= 2
+cal_positive = affected_teeth.sum(axis=1) >= 2 # cal_positive   = CAL 조건 해당하는 대상자인지 확인
+                                               # affected_teeth = CAL 조건 해당되는 것만 저장한 DF
+                                               # .sum() = 합계(메서드)
+                                               # 해석: CAL이 3mm 이상인 치아가 2개 이상이면 True
+                                               # 참고: True=1 / False=0
 
 # 인접면 PD 4mm 이상인 부위 있는지 확인
-pd_positive = (pd_data >= 4).any(axis=1)
+pd_positive = (pd_data >= 4).any(axis=1) # pd_positive = PD 조건 충족하는 것만 저장하는 변수
+                                         # pd_data = 치주낭 깊이 데이터(숫자형)
+                                         # .any()  = 하나라도 만족하면 True
+                                         # axis=1  = 행 기준으로 검사
 
 # 평가 가능한 측정값 있는 대상자만 유지하라
+valid = (
+  cal_data.notna().any(axis=1) # .notna() = 결측치가 아니면 True 반환하는 메서드
+  & pd_data.notna().any(axis=1)# .any()   = 하나라도 만족하면 True
+)                              # axis=1   = 행 기준으로 검사
+
+df = df.loc[valid].copy() # .loc[]  = 행이나 열을 라벨이나 조건으로 선택하는 인덱서
+                          # .copy() = 데이터 복사본 생성
+
+df["target"] = ( # target 이라는 컬럼 지정하거나 생성
+  cal_positive.loc[valid] # .loc[] = 행 or 열을 라벨이나 조건으로 선택
+  & pd_positive.loc[valid]
+).astype(int) # .astype() = 데이터 타입을 변경하는 메서드
+
+print("라벨 생성 후 데이터 크기: ", df.shape) # df.shape = DF의 행과 열을 반환하는 속성
+print(df["target"].value_counts())
+print(df["target"].value_counts(normalize=True) * 100) # .value_counts() = 각 값이 몇번 나왔는가
+                                                       # nomalize=True   = 등장 횟수 대비 비율로 변환
+                                                       # nomalize=False  = 
+                                                       # * 100 = 백분율로 변환
+
+# 5. 모델에 사용할 입력 변수 선택 ------------------------------------------------------------------------------------
+
