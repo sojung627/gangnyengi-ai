@@ -113,6 +113,31 @@ def evaluate_model(model, X, y, model_name): # model = ML 모델
 
 # 4. Logistic Regression 학습 ---------------------------------------------------------------------------------
 
+# 로지스틱 회귀 학습
+lr_model = LogisticRegression(
+  max_iter=1000,
+  random_state=42
+)
+
+# 모델 학습
+lr_model.fit(X_train, y_train)
+
+# 검증데이터 평가
+lr_result = evaluate_model(
+  lr_model,
+  X_val,
+  y_val,
+  "Logistic Regression"
+)
+
+# 모델 저장
+joblib.dump(
+  lr_model,
+  MODELS / "logistic_regression.joblib"
+)
+
+print(("Logistic Regression 학습 완료"))
+
 # 5. XGBoost 모델 학습 ----------------------------------------------------------------------------------------
 
 # 6. 모델 성능 비교 및 저장 ------------------------------------------------------------------------------------
