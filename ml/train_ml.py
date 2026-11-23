@@ -42,4 +42,28 @@ RESULTS.mkdir(parents=True, exist_ok=True) # parents=True  = 부모 폴더도 �
 train = np.load(PROCESSED / "train_data.npz") 
 val = np.load(PROCESSED / "val_data.npz")
 
-# Train 데이터
+# 학습 데이터
+X_train = train["X"]
+y_train = train["y"]
+
+# 검증 데이터
+X_val = val["X"]
+y_val = val["y"]
+
+# 데이터 크기 확인
+print("X_train: ", X_train.shape)
+print("y_train: ", y_train.shape)
+
+print("X-val: ", X_val.shape)
+print("y_val: ", y_val.shape)
+
+# 클래스 분포 확인
+print("Train 클래스: ", np.unique(y_train, return_counts=True))
+print("Validation 클래스: ", np.unique(y_val, return_counts=True))
+
+assert X_train.shape[1] == X_val.shape[1]
+assert set(np.unique(y_train)) == {0, 1}
+assert set(np.unique(y_val)) == {0, 1}
+
+# 3. 모델 성능 평가 함수 정의 ----------------------------------------------------------------------------------
+
