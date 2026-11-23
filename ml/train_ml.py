@@ -145,4 +145,58 @@ print(("Logistic Regression 학습 완료"))
 
 # 5. XGBoost 모델 학습 ----------------------------------------------------------------------------------------
 
+# XGBoost 모델 학습 + 튜닝
+configs = [
+  {"max_depth": 2, "learning_rate": 0.05},
+  {"max_depth": 3, "learning_rate": 0.05},
+  {"max_depth": 3, "learning_rate": 0.02}
+]
+
+xgb_results = []
+best_xgb = None
+best_f1 = -1
+
+for config in configs:
+  model = XGBClassifier(
+    n_estimators=200,
+    max_depth=config["max_depth"],
+    learning_rate=config["learning_rate"],
+    objective="binary:logistic",
+    eval_metrics="logloss",
+    random_state=42,
+    n_jobs=-1,
+    tree_method="hist"
+  )
+
+  # Train으로 학습
+  model.fit(X_train, y_train)
+
+  model_name = (
+    f"XGBoost_depth{config['max_depth']}"
+    f"_lr{config['learning_rate']}"
+  )
+
+  # Val로 성능 평가
+  scores = evaluate_model(
+    model,
+    X_val,
+    y_val,
+    model_name
+  )
+
+  xgb_results.append(scores)
+
+  # 가장 높은 Val F1 모델 선택
+  if scores["f1"] > best_f1:
+    best_f1 = scores["f1"]
+    best_xgb = model
+
+# 최적 XGBoost 모델 저장
+joblib.dump(
+  best_xgb,
+  MODELS / "xgboost.joblib"
+)
+
+print("XGBoost 학습 및 튜닝 완료")
+
 # 6. 모델 성능 비교 및 저장 ------------------------------------------------------------------------------------
