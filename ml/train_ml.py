@@ -114,27 +114,32 @@ def evaluate_model(model, X, y, model_name): # model = ML 모델
 # 4. Logistic Regression 학습 ---------------------------------------------------------------------------------
 
 # 로지스틱 회귀 학습
-lr_model = LogisticRegression(
-  max_iter=1000,
-  random_state=42
+lr_model = LogisticRegression( # LogisticRegression() = 로지스틱 회귀 모델 생성
+  max_iter=1000,  # 학습 최대 반복 횟수
+  random_state=42 # 난수 사용 시 난수 시드는 42로 사용
+                  # 난수: 무작위로 생성되는 숫자
 )
 
 # 모델 학습
-lr_model.fit(X_train, y_train)
+lr_model.fit(X_train, y_train) # .fit() = ()안의 것들로 모델 학습
+                               # 해석: 학습데이터와 정답라벨로 모델 학습
 
-# 검증데이터 평가
-lr_result = evaluate_model(
-  lr_model,
-  X_val,
-  y_val,
-  "Logistic Regression"
+# 검증데이터 평가   
+lr_result = evaluate_model( # lr_result = 로지스틱 회귀 모델 평가 결과
+                            # evaluate_model() = 모델 성능 평가 함수
+  lr_model, # 로지스틱 회귀 모델
+  X_val,    # 검증데이터의 입력데이터
+  y_val,    # 정답라벨의 입력데이터
+  "Logistic Regression" # 평가 결과에 표시될 모델명
 )
 
 # 모델 저장
-joblib.dump(
-  lr_model,
-  MODELS / "logistic_regression.joblib"
-)
+joblib.dump( # joblib  = ML모델을 파일로 저장하거나 불러옴
+             # .dump() = 파이썬 모델을 직렬화하여 파일로 저장
+             # 직렬화: 객체를 파일에 저장할 수 있는 형태로 변환
+  lr_model,  # 학습 완료된 로지스틱 회귀 모델
+  MODELS / "logistic_regression.joblib" # 모델 저장 경로 = 
+)                                       # C:\projects\projectAI\GangNaengI_AI\models\logistic_regression.joblib
 
 print(("Logistic Regression 학습 완료"))
 
