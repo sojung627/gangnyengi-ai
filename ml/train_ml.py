@@ -226,6 +226,13 @@ print("\n=== Validation 성능 비교 ===")
 print(results_df.to_string(index=False)) # .to_string() = DF를 표로 반환
                                          # index = 행 인덱스 출력 여부 결정
                                          # True = 행 인덱스 출력 / False = 행 인덱스 출력 안함
+                                         
+# CSV 파일 저장
+results_df.to_csv(
+  RESULTS / "ml_validation_results.csv", # CSV 파일 경로 =
+                                         # C:\projects\projectAI\GangNaengI_AI\results\ml_validation_results.csv 
+  index=False # index = 행 인덱스 출력 여부 결정
+)             # True = 행 인덱스 출력 / False = 행 인덱스 출력 안함                         
                                   
 # 성능이 가장 높은 모델 기록
 best_model_name = results_df.iloc[0]["model"] # .iloc[] = 행과 열을 정수로 선택하는 인덱서
