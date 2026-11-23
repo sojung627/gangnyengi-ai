@@ -68,7 +68,41 @@ assert X_train.shape[1] == X_val.shape[1] # assert    = 조건이 True인지 검
 assert set(np.unique(y_train)) == {0, 1}  # np.unique() = np의 중복값 제거
 assert set(np.unique(y_val)) == {0, 1}    # {0, 1} = 정답라벨에서 허용한 값만 --> {0, 1}
 
-# 3. 모델 성능 평가 함수 정의 ----------------------------------------------------------------------------------
+# 3. 모델 성능 평가 ----------------------------------------------------------------------------------
+
+# 모델 평가
+def evaluate_model(model, X, y, model_name):
+  # 이진법 - 0 또는 1
+  y_pred = model.predict(X)
+
+  # 클래스 1일 확률 예측
+  y_prob = model.predict_proba(X)[:, 1]
+
+  scores = {
+    "model": model_name,
+    "accuracy": accuracy_score(y, y_pred),
+    "precision": precision_score(
+      y, y_pred, zero_division=0
+    ),
+    "recall": recall_score(
+      y, y_pred, zero_division=0
+    ),
+    "f1": f1_score(
+      y, y_pred, zero_division=0
+    ),
+    "average_precision": average_precision_score(
+      y, y_prob
+    )
+  }
+
+  print(f"\n[{model_name}]")
+  print(
+    classification_report(
+      y, y_pred, zero_division=0
+    )
+  )
+
+  return scores
 
 # 4. Logistic Regression 학습 ---------------------------------------------------------------------------------
 
