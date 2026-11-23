@@ -71,34 +71,41 @@ assert set(np.unique(y_val)) == {0, 1}    # {0, 1} = 정답라벨에서 허용�
 # 3. 모델 성능 평가 ----------------------------------------------------------------------------------
 
 # 모델 평가
-def evaluate_model(model, X, y, model_name):
+def evaluate_model(model, X, y, model_name): # model = ML 모델 
+                                             # X = 입력데이터 
+                                             # y = 정답라벨
+                                             # model_name = 모델명
   # 이진법 - 0 또는 1
-  y_pred = model.predict(X)
+  y_pred = model.predict(X) # .predict() = 입력데이터로 예측 결과 반환
 
   # 클래스 1일 확률 예측
-  y_prob = model.predict_proba(X)[:, 1]
+  y_prob = model.predict_proba(X)[:, 1] # .predict_proba() = 각 클래스에 속할 확률 반환
+                                        # [:, 1] 
+                                        # : = 모든 행 선택 
+                                        # 1 = 두번째 컬럼의 클래스가 1일 확률 
 
+  # 모델 평가 점수 저장
   scores = {
     "model": model_name,
-    "accuracy": accuracy_score(y, y_pred),
-    "precision": precision_score(
-      y, y_pred, zero_division=0
+    "accuracy": accuracy_score(y, y_pred), # 정확도
+    "precision": precision_score( # 정밀도
+      y, y_pred, zero_division=0  # 계산 불가능한 정밀도는 0으로 처리하라
     ),
-    "recall": recall_score(
-      y, y_pred, zero_division=0
+    "recall": recall_score(      # 재현율
+      y, y_pred, zero_division=0 # 계산 불가능한 재현율은 0으로 처리하라 
     ),
-    "f1": f1_score(
-      y, y_pred, zero_division=0
+    "f1": f1_score(              # f1 스코어
+      y, y_pred, zero_division=0 # 계산 불가능한 f1 스코어는 0으로 처리하라 
     ),
-    "average_precision": average_precision_score(
-      y, y_prob
+    "average_precision": average_precision_score( # 평균 정밀도(AP)
+      y, y_prob                                   # 뜻: 정밀도를 재현율 증가에 따라 가중 평균화 함
     )
   }
 
   print(f"\n[{model_name}]")
   print(
-    classification_report(
-      y, y_pred, zero_division=0
+    classification_report(       # classification_report() = 분류 모델 평가 결과를 표로 반환하는 함수
+      y, y_pred, zero_division=0 # 평가지표 계산 안되면 0으로 처리하라
     )
   )
 
