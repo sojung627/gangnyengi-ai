@@ -209,35 +209,57 @@ print("XGBoost 학습 및 튜닝 완료")
 
 # 6. 모델 성능 비교 및 저장 ------------------------------------------------------------------------------------
 
-all_results = [lr_result] + xgb_results
+# 모든 ML모델 평가 결과 저장
+all_results = [lr_result] + xgb_results # [lr_result] = 로지스틱 회귀모델 평가 결과
+                                        # xgb_results = 여러 XGBoost모델 평가 결과
 
-results_df = pd.DataFrame(all_results)
+# 모델 성능 비교 결과 저장
+results_df = pd.DataFrame(all_results) # all_result = 모든 모델 평가 결과
 
 # F1 높은 순으로 정렬
-results_df = results_df.sort_values(
-  by="f1",
-  ascending=False
-)
+results_df = results_df.sort_values( # .sort_values() = 특정 컬럼 값을 기준으로 데이터 정렬
+  by="f1", # by = 정렬할 컬럼 지정
+  ascending=False # ascending = 정렬 기준
+)                 # True = 오름차순 / False = 내림차순
 
 print("\n=== Validation 성능 비교 ===")
-print(results_df.to_string(index=False))
-
+print(results_df.to_string(index=False)) # .to_string() = DF를 표로 반환
+                                         # index = 행 인덱스 출력 여부 결정
+                                         # True = 행 인덱스 출력 / False = 행 인덱스 출력 안함
+                                  
 # 성능이 가장 높은 모델 기록
-best_model_name = results_df.iloc[0]["model"]
+best_model_name = results_df.iloc[0]["model"] # .iloc[] = 행과 열을 정수로 선택하는 인덱서
+                                              # [0]     = 첫번째 행 선택
+                                              # [model] = 모델 열 선택
 
+# 모델 최종 평가 결과 저장
 summary = {
-  "Selection_metric": "validation_f1",
-  "best_model": best_model_name,
-  "best_f1": float(results_df.iloc[0]["f1"]),
-  "evalution_split": "validation"
-}
+  "Selection_metric": "validation_f1", # Selection_metric = 모델 선택 기준 저장할 key
+                                       # validation_f1    = 검증데이터의 F1 기준으로 모델 선택 value
+  "best_model": best_model_name, # best_model = 최고 모델
+                                 # best_model_name = 최고 모델명
+  "best_f1": float(results_df.iloc[0]["f1"]), # best_f1 = 최고의 F1 스코어
+                                              # results_df = 모델 성능 비교 DF
+                                              # .iloc[] = 행과 열을 정수로 선택
+                                              # [0]    = 첫번째 행
+                                              # ["f1"] = f1이 열
+  "evaluation_split": "validation" # evaluation_split = 평가에 사용할 데이터 기록
+}                                  # validation = 검증데이터
 
-with open(
-  RESULTS / "ml_summary.json",
-  "w",
-  encoding="utf-8"
-) as f:
-  json.dump(summary, f, indent=2, ensure_ascii=False)
+with open( # with   = 파일이나 자원 다 쓰면 자동 종료하라
+           # open() = 파일 열거나 생성
+  RESULTS / "ml_summary.json", # 파일 경로 = 
+                               # C:\projects\projectAI\GangNaengI_AI\results\ml_summary.json
+  "w", # w = Write
+       # 파일은 쓰기 모드로 열어라 
+  encoding="utf-8" # encoding = 인코딩 종류 설정
+) as f: # 별칭
+  json.dump(summary, f, indent=2, ensure_ascii=False) # .dump() = 파이썬 객체를 파일로 저장
+                                                      # summary = 모델 최종 평가 결과 저장하는 딕셔너리{}
+                                                      # f = 아까 그 열은 파일 as
+                                                      # indent = 띄어쓰기
+                                                      # ensure_ascii = 아스키가 아닌 것을 유니코드로 변활할 것이냐
+                                                      # True = 바꿔라 / False = 바꾸지마라
 
 print("\n최고 Validation F1 모델: ", best_model_name)
 print("day03 - ML모델 학습 완료")  
