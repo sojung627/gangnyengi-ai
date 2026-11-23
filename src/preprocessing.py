@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parent.parent # Path(__file__) = 현 파일을 P
                                               # 해석: GangNyaengI_AI 폴더를 ROOT에 저장함
 
 PROCESSED = ROOT / "data" / "processed" # PROCESSED = C:\projects\projectAI\GangNaengI_AI\data\processed
-MODELS = ROOT / "models"                # MODELS = C:\projects\projectAI\GangNaengI_AI\models
+MODELS = ROOT / "models"                # MODELS    = C:\projects\projectAI\GangNaengI_AI\models
 
 PROCESSED.mkdir(parents=True, exist_ok=True) # POCESSED 폴더를 생성할 때 부모 폴더 없음 부모 폴더도 생성하라
 MODELS.mkdir(parents=True, exist_ok=True)    # 이미 있으면 생성하지 말고 오류도 내지 마라
@@ -63,7 +63,7 @@ cal_cols = [
 ]                                            # OHX = OHX로 시작하라
                                              # \d  = 0~9 숫자 한자리
                                              # {2} = 앞의 숫자가 정확히 두번 반복하라
-                                             # \LA  = 숫자 다음은 LA라는 문자열
+                                             # LA  = 숫자 다음은 LA라는 문자열
                                              # [DSPA] = D S P A 중 하나 포함
 
 # 치주낭 깊이 
@@ -73,7 +73,7 @@ pd_cols = [
 ]                                            # OHX = OHX로 시작하라
                                              # \d  = 0~9 숫자 한자리
                                              # {2} = 앞의 숫자가 정확히 두번 반복하라
-                                             # \PC  = 숫자 다음은 PC라는 문자열
+                                             # PC  = 숫자 다음은 PC라는 문자열
                                              # [DSPA] = D S P A 중 하나 포함                                             
 
 print("CAL 컬럼 개수: ", len(cal_cols)) # CAL 컬럼 개수

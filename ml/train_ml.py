@@ -39,31 +39,39 @@ RESULTS.mkdir(parents=True, exist_ok=True) # parents=True  = 부모 폴더도 �
 # 2. 학습데이터 불러오기 --------------------------------------------------------------------------------------
 
 # 데이터 불러오기
-train = np.load(PROCESSED / "train_data.npz") 
-val = np.load(PROCESSED / "val_data.npz")
+# 학습데이터 위치 = C:\projects\projectAI\GangNaengI_AI\data\processed\train_data.npz
+# 검증데이터 위치 = C:\projects\projectAI\GangNaengI_AI\data\processed\val_data.npz
+train = np.load(PROCESSED / "train_data.npz") # train = 학습데이터
+val = np.load(PROCESSED / "val_data.npz")     # val   = 검증데이터
 
 # 학습 데이터
-X_train = train["X"]
-y_train = train["y"]
+X_train = train["X"] # X = 입력데이터
+y_train = train["y"] # y = 정답라벨
 
 # 검증 데이터
-X_val = val["X"]
-y_val = val["y"]
+X_val = val["X"] # X = 입력데이터
+y_val = val["y"] # y = 정답라벨
 
 # 데이터 크기 확인
-print("X_train: ", X_train.shape)
-print("y_train: ", y_train.shape)
+print("X_train: ", X_train.shape) # 학습데이터의 입력데이터 행과 열(튜플)
+print("y_train: ", y_train.shape) # 학습데이터의 정답라벨 행과 열(튜플)
 
-print("X-val: ", X_val.shape)
-print("y_val: ", y_val.shape)
+print("X-val: ", X_val.shape) # 검증데이터의 입력데이터 행과 열(튜플)
+print("y_val: ", y_val.shape) # 검증데이터의 정답라벨 행과 열(튜플)
 
 # 클래스 분포 확인
-print("Train 클래스: ", np.unique(y_train, return_counts=True))
-print("Validation 클래스: ", np.unique(y_val, return_counts=True))
-
-assert X_train.shape[1] == X_val.shape[1]
-assert set(np.unique(y_train)) == {0, 1}
-assert set(np.unique(y_val)) == {0, 1}
+print("Train 클래스: ", np.unique(y_train, return_counts=True))    # np.unique() = np의 중복값 제거
+print("Validation 클래스: ", np.unique(y_val, return_counts=True)) # return_counts=True = 고유값이 각 몇번 등장했는가
+                                                                  
+assert X_train.shape[1] == X_val.shape[1] # assert    = 조건이 True인지 검사 --> False면 AssertError
+                                          # .shape[1] = 열만 반환
+assert set(np.unique(y_train)) == {0, 1}  # np.unique() = np의 중복값 제거
+assert set(np.unique(y_val)) == {0, 1}    # {0, 1} = 정답라벨에서 허용한 값만 --> {0, 1}
 
 # 3. 모델 성능 평가 함수 정의 ----------------------------------------------------------------------------------
 
+# 4. Logistic Regression 학습 ---------------------------------------------------------------------------------
+
+# 5. XGBoost 모델 학습 ----------------------------------------------------------------------------------------
+
+# 6. 모델 성능 비교 및 저장 ------------------------------------------------------------------------------------
