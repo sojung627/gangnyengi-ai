@@ -147,56 +147,97 @@ print(("Logistic Regression 학습 완료"))
 
 # XGBoost 모델 학습 + 튜닝
 configs = [
-  {"max_depth": 2, "learning_rate": 0.05},
-  {"max_depth": 3, "learning_rate": 0.05},
-  {"max_depth": 3, "learning_rate": 0.02}
+  {"max_depth": 2, "learning_rate": 0.05}, # max_depth     = 결정트리 최대 깊이
+  {"max_depth": 3, "learning_rate": 0.05}, # learning_rate = 학습률 지정
+  {"max_depth": 3, "learning_rate": 0.02}  # 하이퍼 파리미터 중 하나다(사용자가 설정하는 것)
 ]
 
-xgb_results = []
-best_xgb = None
-best_f1 = -1
+xgb_results = [] # xgb_results = XGBoost 모델 결과 저장하는 리스트
+best_xgb = None  # best_xgb = 가장 좋은 XGBoost 모델만 저장
+                 # None = 지정되지 않음
+best_f1 = -1 # best_f1 = f1 스코어 중 제일 좋은 것
+             # -1 = 초기 비교 기준값
 
-for config in configs:
-  model = XGBClassifier(
-    n_estimators=200,
-    max_depth=config["max_depth"],
-    learning_rate=config["learning_rate"],
-    objective="binary:logistic",
-    eval_metrics="logloss",
-    random_state=42,
-    n_jobs=-1,
-    tree_method="hist"
-  )
+for config in configs: # 아까 그 config들 저장
+  model = XGBClassifier( # XGBClassifier() = XGBoost 분류 모델 생성
+    n_estimators=200, # n_estimators = 부스팅 중 생성될 결정트리 개수
+    max_depth=config["max_depth"],         # max_depth = 결정트리 최대 깊이
+    learning_rate=config["learning_rate"], # learning_rate = 학습률
+    objective="binary:logistic", # objective = 모델 최적화할 학습 목적
+                                 # binary:logistic = 이진법 로지스틱 손실 사용하라
+    eval_metric="logloss", # eval_metric = 모델성능 평가할 지표
+                           # logloss     = 로그 손실
+    random_state=42, # random_state = 난수 시드
+    n_jobs=-1,       # n_jobs = 모델학습에 사용할 CPU 병렬 작업 수 설정 
+    tree_method="hist" # tree_method = 결정트리 생성할 알고리즘 지정
+  )                    # hist = 히스토그램 기반 트리 생성 알고리즘 지정
 
   # Train으로 학습
-  model.fit(X_train, y_train)
+  model.fit(X_train, y_train) # .fit()  = 데이터 이용해 모델 학습 시키는 메서드
+                              # X_train = 학습데이터의 입력데이터
+                              # y_train = 학습데이터의 정답라벨
 
+  # 모델명 정하기
   model_name = (
-    f"XGBoost_depth{config['max_depth']}"
-    f"_lr{config['learning_rate']}"
-  )
+    f"XGBoost_depth{config['max_depth']}" # XGBoost_depth = 모델명
+    f"_lr{config['learning_rate']}" # _lr = 학습률 표시
+  )                                 # ex) 모델명: XGBoost_depth2_lr0.05
 
   # Val로 성능 평가
   scores = evaluate_model(
-    model,
-    X_val,
-    y_val,
-    model_name
+    model, # 학습 완료된 XGBoost 모델
+    X_val, # 검증데이터의 입력데이터
+    y_val, # 검증데이터의 정답라벨
+    model_name # 모델명
   )
 
-  xgb_results.append(scores)
+  xgb_results.append(scores) # xgb_results = 모델 결과 저장
+                             # .append()   = 리스트에 추가
 
   # 가장 높은 Val F1 모델 선택
-  if scores["f1"] > best_f1:
-    best_f1 = scores["f1"]
-    best_xgb = model
+  if scores["f1"] > best_f1: # 현재 f1 > 최고의 f1
+    best_f1 = scores["f1"] # 현재 f1이 더 높으면 현재로 수정
+    best_xgb = model       # XGBoost 1등 모델도 현재로 변경
 
 # 최적 XGBoost 모델 저장
-joblib.dump(
-  best_xgb,
-  MODELS / "xgboost.joblib"
-)
+joblib.dump( # joblib = ML모델을 파일로 저장하거나 불러옴
+  best_xgb,  # best_xgb = XGBoost 1등 모델
+  MODELS / "xgboost.joblib" # 최고 모델 저장 경로 = 
+)                           # C:\projects\projectAI\GangNaengI_AI\models\xgboost.joblib
 
 print("XGBoost 학습 및 튜닝 완료")
 
 # 6. 모델 성능 비교 및 저장 ------------------------------------------------------------------------------------
+
+all_results = [lr_result] + xgb_results
+
+results_df = pd.DataFrame(all_results)
+
+# F1 높은 순으로 정렬
+results_df = results_df.sort_values(
+  by="f1",
+  ascending=False
+)
+
+print("\n=== Validation 성능 비교 ===")
+print(results_df.to_string(index=False))
+
+# 성능이 가장 높은 모델 기록
+best_model_name = results_df.iloc[0]["model"]
+
+summary = {
+  "Selection_metric": "validation_f1",
+  "best_model": best_model_name,
+  "best_f1": float(results_df.iloc[0]["f1"]),
+  "evalution_split": "validation"
+}
+
+with open(
+  RESULTS / "ml_summary.json",
+  "w",
+  encoding="utf-8"
+) as f:
+  json.dump(summary, f, indent=2, ensure_ascii=False)
+
+print("\n최고 Validation F1 모델: ", best_model_name)
+print("day03 - ML모델 학습 완료")  
