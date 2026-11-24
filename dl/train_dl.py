@@ -60,24 +60,28 @@ print("사용 장치: ", device)
 
 # 2. 데이터 부르기 + Tensor 변환 --------------------------------------------------------------------------------
 
-# 학습데이터 불러오기
-train = np.load(PROCESSED / "train_data.npz")
+# 데이터 불러오기
+# 학습데이터 위치: C:\projects\projectAI\GangNaengI_AI\data\processed\train_data.npz
+# 검증데이터 위치: C:\projects\projectAI\GangNaengI_AI\data\processed\val_data.npz
+train = np.load(PROCESSED / "train_data.npz") 
 val = np.load(PROCESSED / "val_data.npz")
 
-X_train = train["X"]
-y_train = train["y"]
+X_train = train["X"] # = 학습데이터의 입력데이터
+y_train = train["y"] # = 학습데이터의 정답라벨
 
-X_val = val["X"]
-y_val = val["y"]
+X_val = val["X"] # = 검증데이터의 입력데이터
+y_val = val["y"] # = 검증데이터의 정답라벨
 
 # Pytorch --> Tensor로 변환
-X_train_tensor = torch.tensor(
-  X_train, dtype=torch.float32
+X_train_tensor = torch.tensor( # Tensor 뜻: 데이터를 저장한 뒤 수학적연산하는 다차원 배열
+  X_train, dtype=torch.float32 # .tensor() = 리스트나 np 같은 것들을 Tensor로 변환
 )
 
 y_train_tensor = torch.tensor(
   y_train, dtype=torch.float32
-).reshape(-1, 1)
+).reshape(-1, 1) # .reshape() = 데이터의 개수 + 값은 유지한채 배열로 변경
+                 # -1 = 전체 데이터 개수에 맞춰 행으로 만들어라
+                 # 1  = 열의 개수는 1개
 
 X_val_tensor = torch.tensor(
   X_val, dtype=torch.float32
@@ -88,22 +92,26 @@ y_val_tensor = torch.tensor(
 ).reshape(-1, 1)
 
 # 데이터 검증
-assert torch.isfinite(X_train_tensor).all()
+assert torch.isfinite(X_train_tensor).all() # assert = 조건이 True면 실행 False면 AssertError
+                                            # .isfinite() = 각 원소가 유한한 숫자인지 검사
+                                            #               NaN이거나 무한수면 False 반환
+                                            # .all() = 모든 원소가 True면 True 반환하라
 assert torch.isfinite(X_val_tensor).all()
-assert X_train_tensor.shape[0] == y_train_tensor.shape[0]
-assert y_train_tensor.shape[0] == y_val_tensor.shape[0]
+assert X_train_tensor.shape[0] == y_train_tensor.shape[0] # .shape    = 차원 크기 반환
+assert y_val_tensor.shape[0] == y_val_tensor.shape[0]     # .shape[0] = 행의 개수 
+                                                          # .shape[1] = 열의 개수
 
 # 데이터셋 생성
-train_dataset = TensorDataset(
+train_dataset = TensorDataset( # TensorDataset() = 여러 tensor를 하나의 데이터셋으로 만듦
   X_train_tensor,
   y_train_tensor
 )
 
 # 데이터로더 생성
-train_loader = DataLoader(
-  train_dataset,
-  batch_size=32,
-  shuffle=True
+train_loader = DataLoader( # 데이터셋을 일정한 크기고 쪼개어 모델에 전달
+  train_dataset, # = 학습용 데이터셋
+  batch_size=32, # 학습 1회당 연산에 사용할 데이터 몇개로 할 지
+  shuffle=True   # 데이터 순서 무작위로 하라
 )
 
 print("Train: ", X_train_tensor.shape)
