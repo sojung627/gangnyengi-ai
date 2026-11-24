@@ -60,6 +60,54 @@ print("사용 장치: ", device)
 
 # 2. 데이터 부르기 + Tensor 변환 --------------------------------------------------------------------------------
 
+# 학습데이터 불러오기
+train = np.load(PROCESSED / "train_data.npz")
+val = np.load(PROCESSED / "val_data.npz")
+
+X_train = train["X"]
+y_train = train["y"]
+
+X_val = val["X"]
+y_val = val["y"]
+
+# Pytorch --> Tensor로 변환
+X_train_tensor = torch.tensor(
+  X_train, dtype=torch.float32
+)
+
+y_train_tensor = torch.tensor(
+  y_train, dtype=torch.float32
+).reshape(-1, 1)
+
+X_val_tensor = torch.tensor(
+  X_val, dtype=torch.float32
+)
+
+y_val_tensor = torch.tensor(
+  y_val, dtype=torch.float32
+).reshape(-1, 1)
+
+# 데이터 검증
+assert torch.isfinite(X_train_tensor).all()
+assert torch.isfinite(X_val_tensor).all()
+assert X_train_tensor.shape[0] == y_train_tensor.shape[0]
+assert y_train_tensor.shape[0] == y_val_tensor.shape[0]
+
+# 데이터셋 생성
+train_dataset = TensorDataset(
+  X_train_tensor,
+  y_train_tensor
+)
+
+# 데이터로더 생성
+train_loader = DataLoader(
+  train_dataset,
+  batch_size=32,
+  shuffle=True
+)
+
+print("Train: ", X_train_tensor.shape)
+print("Validation: ", X_val_tensor.shape)
 
 
 # 3. 모델 + 손실함수 + 옵티마이저 설정 ---------------------------------------------------------------------------
