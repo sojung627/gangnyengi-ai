@@ -182,96 +182,124 @@ print(model)
 # 4. 모델 학습 루프 구현 ----------------------------------------------------------------------------------------
 
 # 학습 시작
-for epoch in range(2, EPOCHS + 1):
+for epoch in range(1, EPOCHS + 1): # Epoch = 학습데이터 전부 학습 1회
+                                   # 100번 학습 시키기
   # Train
-  model.train()
-  train_loss_sum = 0.0
+  model.train() # .train() = 모델학습 모드 전환
+                #            Dropout = 활성화
+                #            사용목적 = 모델 학습
+                #            기울기 제거 = 별도 설정에 따라 다름
+  train_loss_sum = 0.0 # = 현재 Epoch의 전체 학습 손실값으로 누적
+                       # 0.0 = 새로운 Epoch가 시작될 때 마다 Epoch 손실값 누적되지 않게 0으로 초기화
 
-  for X_batch, y_batch in train_loader:
-    X_batch = X_batch.to(device)
-    y_batch = y_batch.to(device)
+  for X_batch, y_batch in train_loader: # X_batch = 현 배치의 학습용 입력데이터
+    X_batch = X_batch.to(device)        # y_batch = 현 배치의 학습용 정답라벨
+    y_batch = y_batch.to(device)        # .to()   = Tensor의 연산장치 이동
 
-    # 이전 Graient 초기화
-    optimizer.zero_grad()
+    # 이전 Graient 초기화 --> = 이전 기울기 제거
+    optimizer.zero_grad() # .zero_grad() = 이전 역전파에서 계산된 기울기를 초기화
+                          #                내부적 기울기를 0이나 None으로
 
     # 순전파
-    logits = model(X_batch)
+    # --> 입력데이터를 신경망을 처음부터 끝까지 순서대로 전달하면서 예측값을 계산
+    # --> 방향: 입력층 -> 은닉층 -> 출력층
+    logits = model(X_batch) 
 
     # 손실 계산
-    loss = criterion(logits, y_batch)
+    loss = criterion(logits, y_batch) # criterion() = 앞에서 생성한 손실함수 객체
+                                      # criterion() = BCEWithLogitsLoss
 
     # 역전파
+    # --> 출력층에서 입력층 방향으로 각 가중치와 편향이 손실값에 영향을 얼마나 미치는지 미분을 통해 계산
+    # --> 방향: 출력층 -> 은닉층 -> 입력층
     loss.backward()
 
     # 가중치 업데이트
-    optimizer.step()
+    optimizer.step() # .step() = 역전파에서 계산된 기울기로 모델의 가중치랑 편향 업데이트
 
+    # 학습 손실값 누적
     train_loss_sum += (
-      loss.item() * X_batch.size(0)
+      loss.item() * X_batch.size(0) 
     )
-  
+
+  # 전체 학습 데이터의 평균 손실값 계산
   train_loss = (
     train_loss_sum / len(train_dataset)
   )  
 
   # Validation 
-  model.eval()
+  model.eval() # .eval() = 모델을 평가모드로 전환
+               #           Dropout = 비활성화
+               #           사용목적 = 모델검증 및 예측
+               #           기울기 계산 = 별도 설정 따름 
 
-  with torch.no_grad():
-    Xv = X_val_tensor.to(device)
-    yv = y_val_tensor.to(device)
+  with torch.no_grad(): # with = 특정 기능이나 설정을 지정한 코드에서만 처리하라
+                        # torch.no_grad() = 자동미분 연산기록 비활성화
+    Xv = X_val_tensor.to(device) # Xv = 검증용 입력데이터 저장
+    yv = y_val_tensor.to(device) # yv = 검증용 정답라벨 저장
+                                 # .to() = Tensor에 지정한 연산장치로 이동 --> GPU or CPU
 
-    val_logists = model(Xv)
-    val_loss = criterion(
-      val_logists, yv
-    ).item()
+    val_logists = model(Xv) # val_logists = 검증데이터 예측 점수 저장
+    val_loss = criterion(   # val_loss = 검증 데이터 평균 손실값 저장
+      val_logists, yv 
+    ).item() # .item() = 계산된 손실값을 Tensor에서 --> 숫자로 변환
 
-    val_prob = torch.sigmoid(
+    val_prob = torch.sigmoid( # val_prob = 검증데이터 예측 확률 저장
       val_logists
-    ).cpu().numpy().ravel()
+    ).cpu().numpy().ravel() # .cpu() = Tensor를 CPU로 이동시킴
+                            # .numpy() = Tensor를 --> NumPy로 변환
+                            # .ravel() = 다차원 NumPy --> 1차원 NumPy로 변환
 
-  val_pred = (val_prob >= 0.5).astype(int)
+  val_pred = (val_prob >= 0.5).astype(int) # val_pred = 검증데이터 예측 라벨 저장
+                                           # val_prob >= 0.5 = 치주질환 여부 판단하는 분류 기준값
+                                           # .astype() = NumPy 배열 자료형(int)으로 변경
   
-  val_f1 = f1_score(
-    y_val,
-    val_pred,
-    zero_division=0
+  val_f1 = f1_score( # val_f1 = 검증데이터 F1 스코어 저장
+    y_val,    # 검증용 정답라벨
+    val_pred, # 모델이 예측한 검증용 정답라벨
+    zero_division=0 # = 평가 지표를 계산 안될 떄 0으로 처리하라
   )  
 
-  history.append({
-    "epoch": epoch,
-    "train_loss": train_loss,
-    "val_loss": val_loss,
-    "val_f1": val_f1
+  # 학습 CSV 파일 저장
+  history.append({ # .append() = 리스트에 추가
+    "epoch": epoch, # epoch = 학습의 반복횟수 저장
+    "train_loss": train_loss, # train_loss = 평균 학습 손실값 저장
+    "val_loss": val_loss, # val_loss = 평균 검증 손실값 저장
+    "val_f1": val_f1 # val_f1 = 검증 F1 스코어 저장
   })
 
   print(
-    f"Epoch {epoch:03d} || "
-    f"Train Loss: {train_loss:.4f}"
-    f"Val Loss: {val_loss:.4f}"
-    f"Val F1: {val_f1:.4f}"
+    f"Epoch {epoch:03d} || " # epoch:03d = 정수 최소 3자리 출력
+    f"Train Loss: {train_loss:.4f}" # train_loss:.4f = 학습 손실값을 소수점 4자리 출력
+    f"Val Loss: {val_loss:.4f}" # val_loss:.4f = 검증 손실값을 소수점 4자리 출력
+    f"Val F1: {val_f1:.4f}" # val_f1:.4f = 검증 F1 스코어 소수점 4자리
   )
 
   # Early Stopping
-  if val_loss < best_val_loss - 1e-5:
+  if val_loss < best_val_loss - 1e-5: # val_loss = Epoch 검증 손실값
+                                      # best_val_loss = 가장 낮은 검증 손실값
     best_val_loss = val_loss
-    best_state = deepcopy(model.state_dict())
+    best_state = deepcopy(model.state_dict()) # best_state    = 검증 손실값이 가장 낮은 모델
+                                              # deepcopy()    = 객체 내부까지 깊게 복사 (원본은 영향 x)
+                                              # .state_dict() = 모델 가중치와 편향, 영구 버퍼 반환
+    # 최적 Epoch 기록
     best_epoch = epoch
-    wait = 0
+    wait = 0 # 대기횟수 초기화
   else:
-    wait += 1
+    wait += 1 # 검증 손실 개선 안되면 대기 1회 증가
   
-  
+  # 검증 손실값 10회 이상 개선 안되었는가
   if wait >= PATIENT:
-    print("Early Stopping 실행")
+    print("Early Stopping 실행") # 학습 조기 종료
     break
   
 # 가장 좋은 검증 손실 얻은 모델 복원
-assert best_state is not None
-model.load_state_dict(best_state)
+assert best_state is not None     # assert = 조건에 맞으면 True로 다음 코드 실행
+                                  #          아니면 AssertError 발생
+model.load_state_dict(best_state) # 가장 좋은 검증 손실 모델
 
-print("Best Epoch: ", best_epoch)
-print("Best Validation Loss: ", best_val_loss)      
+print("Best Epoch: ", best_epoch) # 가장 낮은 검증 손실값을 기록한 Epoch 번호
+print("Best Validation Loss: ", best_val_loss) # 지금까지의 최저 검증 손실값  
 
 # 5. 학습 곡선 그리기 -------------------------------------------------------------------------------------------
 
