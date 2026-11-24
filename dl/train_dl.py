@@ -304,49 +304,110 @@ print("Best Validation Loss: ", best_val_loss) # 지금까지의 최저 검증 �
 # 5. 학습 곡선 그리기 -------------------------------------------------------------------------------------------
 
 # 학습기록 DF로 변환
-history_df = pd.DataFrame(history)
+history_df = pd.DataFrame(history) # history = 각 Epoch 학습손실값 + 검증손실값 + F1스코어 저장된 리스트
 
 # CSV 저장
-history_df.to_csv(
-  RESULTS / "dl_training_history.csv",
-  index=False
-)
+history_df.to_csv( # .to_csv() = DF를 CSV로 저장
+  RESULTS / "dl_training_history.csv", # CSV 경로 = C:\projects\projectAI\GangNaengI_AI\results\dl_training_history.csv
+  index=False # index = 행 인덱스 저장 여부
+)             # True = 저장 / False = 저장 x
 
 # Loss 그래프
-plt.figure(figsize=(9, 5))
+plt.figure(figsize=(9, 5)) # .figure() = 그래프 생성
+                           # figsize   = 그래프 사이즈
 
-plt.plot(
-  history_df["epoch"],
-  history_df["train_loss"],
-  label="Train Loss"
+plt.plot( # plot() = 선 그래프
+  history_df["epoch"], # DF 중 epoch 컬럼 가져와서 "학습반복 횟수를 X축에 저장"
+  history_df["train_loss"], # DF 증 train_loss 컬럼 가져와서 "학습손실값을 Y축에 저장"
+  label="Train Loss" # label = 그래프 범례에 표시할 이름
 )
 
-plt.plot(
-    history_df["epoch"],
-    history_df["val_loss"],
-    label="Validation Loss"
+plt.plot( # plot() = 선 그래프
+    history_df["epoch"], # DF 중 epoch 컬럼 가져와서 "학습반복 횟수를 X축에 저장"
+    history_df["val_loss"], # DF 증 val_loss 컬럼 가져와서 "검증손실값을 Y축에 저장"
+    label="Validation Loss" # label = 그래프 범례에 표시할 이름
 )
 
-plt.axvline(
-    best_epoch,
-    color="gray",
-    linestyle="--",
-    label="Best Epoch"
+plt.axvline( # axvline() = 지정한 X축 위치에 수직선 그림
+    best_epoch, # X축 = 가장 좋은 검증손실값 가진 Epoch
+    color="gray", # 색상 = 그레이
+    linestyle="--", # 선 = 파선
+    label="Best Epoch" # label = 그래프명
 )
 
-plt.xlabel("Epoch")
-plt.ylabel("Loss")
-plt.title("MLP Training Curve")
-plt.legend()
-plt.tight_layout()
+plt.xlabel("Epoch") # .xlabe()  = X축 이름 지정
+plt.ylabel("Loss")  # .ylabel() = Y축 이름 지정
+plt.title("MLP Training Curve") # .title() = 그래프 제목 지정
+plt.legend() # .legend() = 라벨명 및 선색상이나 모양을 범례로 표기 
+plt.tight_layout() # tight_layout() = 여백 자동조절
 
 # 이미지 저장
-plt.savefig(
-    RESULTS / "dl_learning_curve.png",
-    dpi=150
-)
+plt.savefig( # savefig() = 이미지 저장
+    RESULTS / "dl_learning_curve.png", # 이미지 경로 = C:\projects\projectAI\GangNaengI_AI\results\dl_learning_curve.png
+    dpi=150 # dpi = 1인치당 점의 개수
+)           # 해석: 1인치당 점이 150개
 
-plt.show()
-
+plt.show() # .show() = 그래프 출력
 
 # 6. 최적 모델 평가 및 저장 -------------------------------------------------------------------------------------
+
+# 평가모드
+model.eval()
+
+with torch.no_grad():
+    logits = model(X_val_tensor.to(device))
+
+    probabilities = torch.sigmoid(
+        logits
+    ).cpu().numpy().ravel()
+
+predictions = (probabilities >= 0.5).astype(int)
+
+# 성능 계산
+scores = {
+    "model": "PyTorch MLP",
+    "accuracy": float(accuracy_score(
+        y_val, predictions
+    )),
+    "precision": float(precision_score(
+        y_val, predictions, zero_division=0
+    )),
+    "recall": float(recall_score(
+        y_val, predictions, zero_division=0
+    )),
+    "f1": float(f1_score(
+        y_val, predictions, zero_division=0
+    )),
+    "average_precision": float(
+        average_precision_score(
+            y_val, probabilities
+        )
+    ),
+    "best_epoch": int(best_epoch),
+    "best_val_loss": float(best_val_loss),
+    "input_dim": int(input_dim)
+}
+
+print("\n=== MLP Validation Results ===")
+for name, value in scores.items():
+    print(f"{name}: {value}")
+
+# 모델 가중치 저장
+torch.save(
+    model.state_dict(),
+    MODELS / "mlp_model.pth"
+)
+
+# 성능 평가 결과 저장
+with open(
+    RESULTS / "dl_validation_results.json",
+    "w",
+    encoding="utf-8"
+) as f:
+    json.dump(
+        scores, f,
+        ensure_ascii=False,
+        indent=2
+    )
+
+print("day04 - 딥러닝 모델 학습 완료!")
