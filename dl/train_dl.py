@@ -354,60 +354,70 @@ plt.show() # .show() = 그래프 출력
 # 평가모드
 model.eval()
 
-with torch.no_grad():
-    logits = model(X_val_tensor.to(device))
+with torch.no_grad(): # with = 특정 범위로 제한
+                      # no_grad() = 자동 미분 연산 기록 비활성화
+    logits = model(X_val_tensor.to(device)) # 순전파 예측확률 계산
 
-    probabilities = torch.sigmoid(
+    probabilities = torch.sigmoid( # probabilities = 환자별 치주질환 예측 확률 저장
+                                   # .sigmoid() = 모델 예측 점수 0~1 사이 확률값으로 변환
         logits
-    ).cpu().numpy().ravel()
+    ).cpu().numpy().ravel() # .cpu() = Tensor를 CPU로 이동
+                            # .numpy() = Tensor를 --> NumPy로
+                            # .ravel() = 다차원 NP를 --> 일차원 NP로
 
-predictions = (probabilities >= 0.5).astype(int)
+predictions = (probabilities >= 0.5).astype(int) # predictions   = 예측라벨 저장
+                                                 # probabilities = 시그모이드 함수로 변환된 치주질환 예측 확률
+                                                 # 0.5 = 치주질환으로 인정하는 임계값
+                                                 # .astype() = 타입 설정
 
 # 성능 계산
 scores = {
-    "model": "PyTorch MLP",
-    "accuracy": float(accuracy_score(
-        y_val, predictions
+    "model": "PyTorch MLP", # 모델명 = PyTorch MLP
+    "accuracy": float(accuracy_score( # = 정확도를 소수로
+        y_val, predictions # y_val = 검증용 정답라벨
+    )),                    # predictions = 모델이 생성한 예측라벨
+    "precision": float(precision_score( # = 정밀도를 소수로
+        y_val, predictions, zero_division=0 # zero_division = 계산할 수 없는 경우 0을 사용해
     )),
-    "precision": float(precision_score(
+    "recall": float(recall_score( # = 재현율을 소수로
         y_val, predictions, zero_division=0
     )),
-    "recall": float(recall_score(
+    "f1": float(f1_score( # = F1 스코어를 소수로
         y_val, predictions, zero_division=0
     )),
-    "f1": float(f1_score(
-        y_val, predictions, zero_division=0
-    )),
-    "average_precision": float(
+    "average_precision": float( # = 평균 정밀도를 소수로
         average_precision_score(
-            y_val, probabilities
+            y_val, probabilities # probabilities = 모델이 계산한 예측 확률
         )
     ),
-    "best_epoch": int(best_epoch),
-    "best_val_loss": float(best_val_loss),
-    "input_dim": int(input_dim)
+    "best_epoch": int(best_epoch), # best_epoch = 최적 Epoch 번호 저장
+    "best_val_loss": float(best_val_loss), # best_val_loss = 최적 검증 손실값 저장
+    "input_dim": int(input_dim) # input_dim = 신경망에 입력되는 특성 개수
 }
 
+# 다층 퍼셉트론 검증 결과
 print("\n=== MLP Validation Results ===")
 for name, value in scores.items():
     print(f"{name}: {value}")
 
 # 모델 가중치 저장
-torch.save(
-    model.state_dict(),
-    MODELS / "mlp_model.pth"
+torch.save( # .save() = Tensor, dict, 모델 상태 등을 파일로 저장
+    model.state_dict(), # state_dict = 모델의 가중치 + 편향 + 영구 버퍼를 딕셔너리로 반환
+    MODELS / "mlp_model.pth" # 모델 가중치 = C:\projects\projectAI\GangNaengI_AI\models\mlp_model.pth
 )
 
 # 성능 평가 결과 저장
-with open(
-    RESULTS / "dl_validation_results.json",
-    "w",
-    encoding="utf-8"
-) as f:
-    json.dump(
-        scores, f,
-        ensure_ascii=False,
-        indent=2
+with open( # with   = 특정 범위로 지정
+           # open() = 파일 열거나 생성
+    RESULTS / "dl_validation_results.json", # 성능 평가 결과 = C:\projects\projectAI\GangNaengI_AI\results\dl_validation_results.json
+    "w", # w = 쓰기모드
+    encoding="utf-8" # 인코딩은 utf-8로 하라
+) as f: # 별칭이 f
+    json.dump( # .dump() = 데이터를 내보내거라 기록하라
+        scores, f, 
+        ensure_ascii=False, # ensure_ascii = 아스키를 벗어나는 문자를 이스케이프 문자로 변활할 것 이냐
+                            # True = 변환 / False = 변환 x
+        indent=2 # indent = 들여쓰기
     )
 
 print("day04 - 딥러닝 모델 학습 완료!")
