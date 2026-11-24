@@ -21,7 +21,7 @@ class PerioMLP(nn.Module): # nn.Module = Pytorch의 기본 클래스
                                 # input_dim  = 입력데이터 특성 개수
                                 # 32 = 출력뉴런 개수 
                                 # 뜻: input_dim을 32개로 반환
-      nn.ReLLU(), # 렐루함수: 비선형 패턴 학습할 수 있게 해주는 활성화 함수
+      nn.ReLU(), # 렐루함수: 비선형 패턴 학습할 수 있게 해주는 활성화 함수
 
       nn.Linear(32, 16), # 아까 받은 출력뉴런 32개를 16개로 바꿈
       nn.ReLU(), # 그 16개를 렐루함수에 적용

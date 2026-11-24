@@ -98,7 +98,7 @@ assert torch.isfinite(X_train_tensor).all() # assert = 조건이 True면 실행 
                                             # .all() = 모든 원소가 True면 True 반환하라
 assert torch.isfinite(X_val_tensor).all()
 assert X_train_tensor.shape[0] == y_train_tensor.shape[0] # .shape    = 차원 크기 반환
-assert y_val_tensor.shape[0] == y_val_tensor.shape[0]     # .shape[0] = 행의 개수 
+assert X_val_tensor.shape[0] == X_val_tensor.shape[0]     # .shape[0] = 행의 개수 
                                                           # .shape[1] = 열의 개수
 
 # 데이터셋 생성
