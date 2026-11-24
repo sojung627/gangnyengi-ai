@@ -121,29 +121,59 @@ print("Validation: ", X_val_tensor.shape)
 # 3. 모델 + 손실함수 + 옵티마이저 설정 ---------------------------------------------------------------------------
 
 # 입력 변수 개수
-input_dim = X_train.shape[1]
+input_dim = X_train.shape[1]  # input_dim = 입력 특성 개수 저장
+                              # X_train.shape[1] = X_train의 컬럼만 대입
 
 # 모델 생성
-model = PerioMLP(input_dim).to(device)
+model = PerioMLP(input_dim).to(device) # PerioMLP  = 치주질환 신경망
+                                       # input_dim = 입력 특성 개수
+                                       # .to()  = PR모델이나 Tensor를 연산장치로 이동
+                                       # device = 연산장치(GPU / CPU)
 
 # 이진분류 손실함수
-crierion = nn.BCEWithLogitsLoss()
+criterion = nn.BCEWithLogitsLoss() # crierion = 손실함수
+                                  # nn = Pytorch 신경망 관련 기능 제공 모듈
+                                  # .BCEWithLogitsLoss() = 시그모이드함수랑 이진교차 엔트로피 손실함수 결합
+                                  # 시그모이드 함수: 
+                                  # 이진 교차: 
+                                  # 엔트로피 손실함수: 
+                                  # 해석: 출력값(로짓)이 2.0 
+                                  #       -> 
+                                  #       시그모이드 0~1 사이 반환 --> 값 0.881
+                                  #       -> 
+                                  #       바이너리 크로스 엔트로피(예측확률) --> 정답라벨 1과 비교
+                                  #       -> 
+                                  #       손실값 --> 약 0.127
 
 # 가중치 최적화 알고리즘
-optimizer = torch.optim.Adam(
-  model.parameters(),
-  lr=0.001
-)
+optimizer = torch.optim.Adam( # optimizer = 옵티마이저 저장용
+                              # 옵티마이저: 
+                              # .optim() = 가중치 최적화 알고리즘
+                              # .Adam()  = 기울기 이동평균과 기울기 제곱 이동평균으로 매개변수 업데이트 크기 조절
+  model.parameters(), # .parameters() = 모델 내부에 등록된 매개변수 중 순회 가능한 객체만 반환
+  lr=0.001 # Learning rate(학습률)
+)          # 가중치와 편향 업데이트 시 업데이트 크기 조절
 
 # 학습 설정
-EPOCHS = 100
-PATIENT = 10
+EPOCHS = 100 # EPOCHS = 전체 학습데이터 한번씩 사용하라
+             # 최대 100번 학습하라
+PATIENT = 10 # PATIENT = 검증 성능이 개선되지 않을 때 PATIENT에 저장
+             # 10 = 검증 성능 10번 이상 개선 안되면 학습 조기중단
+             # --> 결과: 과적합 줄어듦
 
-best_val_loss = float("inf")
+# 최고의 검증된 손실함수
+best_val_loss = float("inf") # inf = 무한대
+
+# 최고의 검증된 모델 가중치 + 편향 저장
 best_state = None
+
+# 가장 낮은 검증 손실값 기록
 best_epoch = 0
+
+# 검증 손실값이 연속으로 개선되지 않은 횟수 저장
 wait = 0
 
+# 학습기록 저장
 history = []
 
 print(model)
