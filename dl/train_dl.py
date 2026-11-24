@@ -1,5 +1,13 @@
 # 1. 라이브러리 및 경로 설정 -------------------------------------------------------------------------------------
 
+from pathlib import Path
+from copy import deepcopy
+import json
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
 import torch
 from torch import nn
 from torch.utils.data import TensorDataset, DataLoader
@@ -15,6 +23,9 @@ from sklearn.metrics import (
 from model import PerioMLP
 
 # 프로젝트 경로
+ROOT = Path(__file__).resolve().parent.parent
+
+
 
 
 # 2. 데이터 부르기 + Tensor 변환 --------------------------------------------------------------------------------
