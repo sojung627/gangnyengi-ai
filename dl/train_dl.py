@@ -134,9 +134,10 @@ model = PerioMLP(input_dim).to(device) # PerioMLP  = 치주질환 신경망
 criterion = nn.BCEWithLogitsLoss() # crierion = 손실함수
                                   # nn = Pytorch 신경망 관련 기능 제공 모듈
                                   # .BCEWithLogitsLoss() = 시그모이드함수랑 이진교차 엔트로피 손실함수 결합
-                                  # 시그모이드 함수: 
-                                  # 이진 교차: 
-                                  # 엔트로피 손실함수: 
+                                  # 시그모이드 함수: 모델이 출력한 숫자를 0~1 사이 확률값으로 반환
+                                  # 이진: 0이나 1이라는 두가지 클래스로 분류
+                                  # 교차 엔트로피: 정답라벨의 분포 + 모델이 예측한 확률 분포 차이 평가 
+                                  # 손실함수: 모델 에측과 정답이 얼마나 다른지 수치로 계산
                                   # 해석: 출력값(로짓)이 2.0 
                                   #       -> 
                                   #       시그모이드 0~1 사이 반환 --> 값 0.881
@@ -147,7 +148,7 @@ criterion = nn.BCEWithLogitsLoss() # crierion = 손실함수
 
 # 가중치 최적화 알고리즘
 optimizer = torch.optim.Adam( # optimizer = 옵티마이저 저장용
-                              # 옵티마이저: 
+                              # 옵티마이저: 가중치와 편향 조절 알고리즘
                               # .optim() = 가중치 최적화 알고리즘
                               # .Adam()  = 기울기 이동평균과 기울기 제곱 이동평균으로 매개변수 업데이트 크기 조절
   model.parameters(), # .parameters() = 모델 내부에 등록된 매개변수 중 순회 가능한 객체만 반환
@@ -179,6 +180,98 @@ history = []
 print(model)
 
 # 4. 모델 학습 루프 구현 ----------------------------------------------------------------------------------------
+
+# 학습 시작
+for epoch in range(2, EPOCHS + 1):
+  # Train
+  model.train()
+  train_loss_sum = 0.0
+
+  for X_batch, y_batch in train_loader:
+    X_batch = X_batch.to(device)
+    y_batch = y_batch.to(device)
+
+    # 이전 Graient 초기화
+    optimizer.zero_grad()
+
+    # 순전파
+    logits = model(X_batch)
+
+    # 손실 계산
+    loss = criterion(logits, y_batch)
+
+    # 역전파
+    loss.backward()
+
+    # 가중치 업데이트
+    optimizer.step()
+
+    train_loss_sum += (
+      loss.item() * X_batch.size(0)
+    )
+  
+  train_loss = (
+    train_loss_sum / len(train_dataset)
+  )  
+
+  # Validation 
+  model.eval()
+
+  with torch.no_grad():
+    Xv = X_val_tensor.to(device)
+    yv = y_val_tensor.to(device)
+
+    val_logists = model(Xv)
+    val_loss = criterion(
+      val_logists, yv
+    ).item()
+
+    val_prob = torch.sigmoid(
+      val_logists
+    ).cpu().numpy().ravel()
+
+  val_pred = (val_prob >= 0.5).astype(int)
+  
+  val_f1 = f1_score(
+    y_val,
+    val_pred,
+    zero_division=0
+  )  
+
+  history.append({
+    "epoch": epoch,
+    "train_loss": train_loss,
+    "val_loss": val_loss,
+    "val_f1": val_f1
+  })
+
+  print(
+    f"Epoch {epoch:03d} || "
+    f"Train Loss: {train_loss:.4f}"
+    f"Val Loss: {val_loss:.4f}"
+    f"Val F1: {val_f1:.4f}"
+  )
+
+  # Early Stopping
+  if val_loss < best_val_loss - 1e-5:
+    best_val_loss = val_loss
+    best_state = deepcopy(model.state_dict())
+    best_epoch = epoch
+    wait = 0
+  else:
+    wait += 1
+  
+  
+  if wait >= PATIENT:
+    print("Early Stopping 실행")
+    break
+  
+# 가장 좋은 검증 손실 얻은 모델 복원
+assert best_state is not None
+model.load_state_dict(best_state)
+
+print("Best Epoch: ", best_epoch)
+print("Best Validation Loss: ", best_val_loss)      
 
 # 5. 학습 곡선 그리기 -------------------------------------------------------------------------------------------
 
