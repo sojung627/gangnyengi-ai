@@ -303,4 +303,50 @@ print("Best Validation Loss: ", best_val_loss) # 지금까지의 최저 검증 �
 
 # 5. 학습 곡선 그리기 -------------------------------------------------------------------------------------------
 
+# 학습기록 DF로 변환
+history_df = pd.DataFrame(history)
+
+# CSV 저장
+history_df.to_csv(
+  RESULTS / "dl_training_history.csv",
+  index=False
+)
+
+# Loss 그래프
+plt.figure(figsize=(9, 5))
+
+plt.plot(
+  history_df["epoch"],
+  history_df["train_loss"],
+  label="Train Loss"
+)
+
+plt.plot(
+    history_df["epoch"],
+    history_df["val_loss"],
+    label="Validation Loss"
+)
+
+plt.axvline(
+    best_epoch,
+    color="gray",
+    linestyle="--",
+    label="Best Epoch"
+)
+
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("MLP Training Curve")
+plt.legend()
+plt.tight_layout()
+
+# 이미지 저장
+plt.savefig(
+    RESULTS / "dl_learning_curve.png",
+    dpi=150
+)
+
+plt.show()
+
+
 # 6. 최적 모델 평가 및 저장 -------------------------------------------------------------------------------------
