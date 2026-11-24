@@ -120,6 +120,34 @@ print("Validation: ", X_val_tensor.shape)
 
 # 3. 모델 + 손실함수 + 옵티마이저 설정 ---------------------------------------------------------------------------
 
+# 입력 변수 개수
+input_dim = X_train.shape[1]
+
+# 모델 생성
+model = PerioMLP(input_dim).to(device)
+
+# 이진분류 손실함수
+crierion = nn.BCEWithLogitsLoss()
+
+# 가중치 최적화 알고리즘
+optimizer = torch.optim.Adam(
+  model.parameters(),
+  lr=0.001
+)
+
+# 학습 설정
+EPOCHS = 100
+PATIENT = 10
+
+best_val_loss = float("inf")
+best_state = None
+best_epoch = 0
+wait = 0
+
+history = []
+
+print(model)
+
 # 4. 모델 학습 루프 구현 ----------------------------------------------------------------------------------------
 
 # 5. 학습 곡선 그리기 -------------------------------------------------------------------------------------------
