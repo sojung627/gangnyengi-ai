@@ -670,46 +670,64 @@ plt.show() # .show() = 그래프 출력
 # 오분류 결과
 error_results = []
 
-for name, info in models.items():
-  predictions = (
-    info["prob"] >= info["threshold"]
-  ).astype(int)
+# 모델별 예측 라벨 생성
+for name, info in models.items(): # name = 모델명
+                                  # info = 모델 정보
+                                  # .items() = dict에 key와 value 반환
+  predictions = ( # predictions = 모델 예측라벨 배열
+    info["prob"] >= info["threshold"] # 모델 예측 확률 >= 모델 분류 임계값
+  ).astype(int) # .astype() = 배열을 자료형으로 변경
 
-  for i in range(len(y_test)):
-    if predictions[i] != y_test[i]:
-      error_type = (
-        "FN" if y_test[i] == 1 else "FP"
-      )
+  # 오분류 데이터 탐색
+  for i in range(len(y_test)): # y_test = 테스트데이터 정답라
+    if predictions[i] != y_test[i]: # predictions[i] = 인덱스 i인 예측라벨 
+                                    # y_test[i] = 인덱스 i인 정답라벨
+      # 오분류 유형 결정                              
+      error_type = ( # error_type = 오분류 타입
+        "FN" if y_test[i] == 1 else "FP" # Ture면 FN(위음성)
+      )                                  # False면 FP(위양성)
+      # TN[진음성] = 예측성공 | 실제라벨=0 예측라벨=0 | 음성을 음성으로 예측
+      # TP[진양성] = 예측성공 | 실제라벨=1 예측라벨=1 | 양성을 양성으로 예측
+      # FN[위음성] = 예측실패 | 실제라벨=1 예측라벨=0 | 음성을 양성으로 예측
+      # FP[위양성] = 예측실패 | 실제라벨=0 에측라벨=1 | 양성을 음성으로 예측
 
-      error_results.append({
-        "model": name,
-        "test_row": i,
-        "actual": int(y_test[i]),
-        "predicted": int(predictions[i]),
-        "probability": float(info["prob"][i]),
-        "error_type": error_type
+      # 오분류표 상세 정보 저장
+      error_results.append({ # .append() = 리스트에 추가
+        "model": name, # 모델명
+        "test_row": i, # 테스트데이터 행 인덱스
+        "actual": int(y_test[i]), # 실제 정답라벨
+        "predicted": int(predictions[i]), # 모델 예측라벨
+        "probability": float(info["prob"][i]), # 모델 양성 예측 확률
+        "error_type": error_type # 오분류 유형
       })
 
-error_df = pd.DataFrame(error_results)
+error_df = pd.DataFrame(error_results) # error_results = 오분류 결과
 
 print("\n=== Error Type Counts ===")
 print(
-  error_df.groupby(
-    ["model", "error_type"]
-  ).size()
+  error_df.groupby( # .groupby() = 컬럼을 동일한 값을 기준으로 데이터 그룹화
+    ["model", "error_type"] # model = 모델
+                            # error_type = 오분류 타입
+  ).size() # .size() = 각 그룹에 포함된 행의 개수 반환
 )
 
 # 오분류 결과 저장
-error_df.to_csv(
-  RESULTS / "error_analysis.csv",
-  index=False
-)
+error_df.to_csv( # .to_csv() = CSV로 저장  
+  RESULTS / "error_analysis.csv", # 오분류 결과 파일 = C:\projects\projectAI\GangNaengI_AI\results\error_analysis.csv
+  index=False # index = 인덱스 행 같이 저장 유무
+)             # True = 저장 | False = 저장 x
 
 print("\n === False Negative Examples ===")
 print(
   error_df[
-    error_df["error_type"] == "FN"
-  ].head(10)
+    error_df["error_type"] == "FN" # error_type = 오분류 타입
+                                   # 해석: error_type이 FN인 것만 출력
+    # 오분류 타입                               
+    # TN[진음성] = 예측성공 | 실제라벨=0 예측라벨=0 | 음성을 음성으로 예측
+    # TP[진양성] = 예측성공 | 실제라벨=1 예측라벨=1 | 양성을 양성으로 예측
+    # FN[위음성] = 예측실패 | 실제라벨=1 예측라벨=0 | 음성을 양성으로 예측
+    # FP[위양성] = 예측실패 | 실제라벨=0 에측라벨=1 | 양성을 음성으로 예측                                   
+  ].head(10) # .head(10) = 앞의 10개만 출력
 )
 
 # 14. 결과 요약 --------------------------------------------------------------------------------------------------
@@ -719,16 +737,22 @@ print("GangNaengI AI - DAY 05 Evalution")
 print("=" * 50)
 
 print("\n[최종 모델 성능]")
-print(results_df.to_string(index=False))
+print(results_df.to_string(index=False)) # .to_string() = DF를 str로
+                                         # index = 인덱스 행 같이 출력 유무
+                                         # True = 출력 | False = 출력 x
 
 print("\n[SHAP 중요 특성 TOP 5]")
-print(shap_df.head(5).to_string(index=False))
+print(shap_df.head(5).to_string(index=False)) # .head(5) = 앞의 5개만 출력
+                                              # .to_string() = DF를 str로
+                                              # index = 인덱스 행 같이 출력 유무
+                                              # True = 출력 | False = 출력 x
 
 print("\n[오분류 개수]")
 print(
-  error_df.groupby(
-    ["model", "error_type"]
-  ).size()
+  error_df.groupby( # .groupby() = 컬럼을 동일한 값을 기준으로 데이터 그룹화
+    ["model", "error_type"] # model = 모델
+                            # error_type = 오분류 타입
+  ).size() # .size() = 각 그룹에 포함된 행의 개수 반환
 )
 
 print("day 05 - 모델 평가 및 분석 완료")
