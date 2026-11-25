@@ -555,10 +555,16 @@ for name, info in models.items(): # name = 모델명
 
   plt.show() # .show() = 그래프 출력
 
-# 11. 전처리 입력 변수 이름 복원 ----------------------------------------------------------------------------------
+# 11. 전처리 입력 변수명 복원 ----------------------------------------------------------------------------------------
 
 # SHAP = 모델 예측 결과에 대한 각 입력특성의 기여도 분석
 #        요약: 어떤 입력특성이 예측값을 얼마나 높이고 낮췄는가
+
+# SHAP 분석 클래스 - 분석 대상
+# TreeExplainer   - 트리기반 모델 ex) XGBoost, RandomForest
+# LinearExplainer - 로지스틱 회귀 모델
+# DeepExplainer   - 딥러닝 신경망
+# KerneExplainer  - 다양한 모델 아무거나
 
 # 입력 변수 = 연령, 나이, 성별, 흡연 
 
@@ -583,6 +589,75 @@ assert len(feature_names) == X_test.shape[1] # assert = 조건이 True면 실행
 
 
 # 12. XGBoost SHAP 중요도 계산 -----------------------------------------------------------------------------------
+
+# 테스트데이터 일부 사용 
+# --> 속도를 위해
+X_sample = X_test[:200] # [:200] = 인덱스 0~199까지 추출하라
+
+# TreeExplainer 생성
+explainer = shap.TreeExplainer(xgb_model) # explainer = 모델예측 결과 설명용 객체
+                                          # shap = 모델예측 결과의 입력 특성 기여도 분석
+                                          # .TreeExplainer() = 트리모델의 SHAP 분석
+                                          # SHAP = 모델 예측 결과에 대한 각 입력특성의 기여도 분석
+                                          # xgb_model = XGBoost 모델
+                                          
+                                          # SHAP 분석 클래스 - 분석 대상
+                                          # TreeExplainer   - 트리기반 모델 ex) XGBoost, RandomForest
+                                          # LinearExplainer - 로지스틱 회귀 모델
+                                          # DeepExplainer   - 딥러닝 신경망
+                                          # KerneExplainer  - 다양한 모델 아무거나
+# SHAP 값 계산
+shap_values = explainer(X_sample) # shap_values = SHAP 분석 결과
+                                  # X_sample = SHAP 분석용 데이터 200건
+
+# 특성별 평균 절대값(SHAP) 기여도
+importance = np.abs( # importance = 입력 특성별 중요도
+                     # .abs() = NP로 숫자 절대값 반환
+                     # 절대값: 0과의 거리
+  shap_values.values # shap_values = SHAP 분석 결과
+                     # .values = 계산된 SHAP 수치 배열로 반환
+).mean(axis=0) # .mean() = 평균값
+               # axis = 배열 축 지정
+               # axis=0 = 행 방향
+               # axis=1 = 열 방향
+
+shap_df = pd.DataFrame({ 
+  "feature": feature_names, # feature = 입력 특성명의 컬럼명
+                            # feature_names = 전처리 입력 특성명 배열
+  "mean_abs_shap": importance # mean_abs_shap = 평균 절대 SHAP값
+})                            # important = 계산한 특성별 중요도 배열
+
+# 중요도 내림차순
+shap_df = shap_df.sort_values( # .sort_values() = 지정한 컬럼의 값을 정렬
+  by="mean_abs_shap", # by = 정렬 기준 컬럼명을 지정
+                      # mean_abs_shap = 평균 절대 SHAP값
+  ascending=False # ascending = 정렬 기준
+)                 # True = 오름차순 | False = 내림차순
+
+print("\n=== SHAP Feature Important ===")
+print(shap_df)
+
+# SHAP 중요도 시각화
+plt.figure(figsize=(10, 6)) # .figure() = Figure 생성
+                            # figsize   = Figure 사이즈 --> 가로 10인치 + 세로 6인치 
+
+plt.barh( # .barh() = 가로 막대그래프 생성
+  shap_df["feature"][::-1], # feature = 입력 특성명 컬럼을 추출
+                            # [::-1]  = 데이터 순서를 역순으로 변경
+  shap_df["mean_abs_shap"][::-1] # mean_abs_shap = 평균 절대 SHAP값
+)                                # [::-1]  = 데이터 순서를 역순으로 변경
+
+plt.xlabel("Mean Absolute SHAP Value") # .xlabel() = X축라벨 지정
+plt.title("XGBosot - SHAP Feature Important") # .title() = 제목
+plt.tight_layout() # .tight_layout() = 여백 자동 조절
+
+# SHAP 이미지 저장
+plt.savefig( # .savefig() = Figure를 이미지로 저장
+  RESULTS / "shap_important.png", # SHAP 이미지 위치 = C:\projects\projectAI\GangNaengI_AI\results\shap_important.png
+  dpi=150 # dpi = 해상도
+)         # 해석: 1인치당 점(픽셀)이 150개
+
+plt.show() # .show() = 그래프 출력
 
 # 13. 오분류 사례 분석 -------------------------------------------------------------------------------------------
 
