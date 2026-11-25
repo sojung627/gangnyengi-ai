@@ -137,6 +137,26 @@ print("ML 모델 로딩 완료")
 
 # 4. DL모델 불러오기 --------------------------------------------------------------------------------------------
 
+# 디바이스 부르기
+device = torch.device("cpu")
+
+mlp_model = PerioMLP(
+  input_dim=X_test.shape[1]
+).to(device)
+
+state_dict = torch.load(
+  MODELS / "mlp_model.pth",
+  map_location=device,
+  weights_only=True
+)
+
+mlp_model.load_state_dict(state_dict)
+
+# 평가모드
+mlp_model.eval()
+
+print("MLP 모델 로딩 완료")
+
 # 5. 3개 모델 예측 확률 구하기 -----------------------------------------------------------------------------------
 
 # 6. ML DL 성능 평가 --------------------------------------------------------------------------------------------
