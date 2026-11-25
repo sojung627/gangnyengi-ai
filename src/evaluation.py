@@ -498,7 +498,62 @@ plt.show() # 그래프 출력
 # PR Curve = 정밀도와 재현율 관계를 보여줌
 #            양성과 음성을 얼마나 잘 구분하는지 알 수 있음
 
+plt.figure(figsize=(9, 6)) # .figure() = Figure를 생성하라
+                           # figsize = Figure 사이즈 --> 가로 9인치 + 세로 6인치
 
+#
+for name, info in models.items(): # name = 모델명
+                                  # info = 모델 정보
+                                  # .items() = dict의 key와 value 반환
+  precision, recall, thresholds = ( # precision = 정밀도
+                                    # recall = 재현율
+                                    # thresholds = 임계값 배열
+    # PR 곡선                                
+    precision_recall_curve( # precision_recall_curve() = 정밀도와 재현율의 곡선(PR 곡선)
+      y_test, # 테스트의 정답라벨
+      info["prob"] # info = 모델 정보
+    )              # prob = 확률
+  )
+
+  # AP - 평균정밀도
+  ap = average_precision_score(
+    y_test, # 테스트의 정답라벨
+    info["porb"] # info = 모델 정보
+  )              # prob = 확률            
+  
+  plt.plot( # .plot = 그래프
+    recall,    # 재현율
+    precision, # 정밀도
+    label=f"{name} (AP={ap:.3f})" # label = 범례명 지정
+  )                               # name  = 모델명
+                                  # AP = 평균 정밀도 곡선
+                                  # {ap:.3f} = ap를 소수점 3자리까지
+                                  # : = 형식지정 | .3 = 소수점3자리 | f = 고정소수점
+  
+  # 테스트 데이터의 양성비율
+  baseline = np.mean(y_test) # .mean() = 중앙값
+  
+  plt.axhline( # .axhline() = y축에 수평선 그려라
+    baseline,  # 테스트데이터의 양성비율
+    color="gray", # 색상은 회색
+    linestyle="---", # 선은 점선으로
+    label=f"Positive Rage={baseline:.3f}" # label = 범례명 지정
+  )                                       # :.3f = 소수점 3자리
+                                          # : = 형식지정 | .3 = 소수점3자리 | f = 고정소수점
+
+  plt.xlabel("Recall") # .xlabel()    = X축라벨 설정
+  plt.ylabel("Precision") # .ylabel() = y축라벨 설정
+  plt.title("Precision-Recall Curve") # .title() = 그래프 제목
+  plt.legend() # .legand() = 범례 표기
+  plt.tight_layout() # tight_layout() = 여백 자동 설정   
+
+  # PR Curve 이미지 저장
+  plt.savefig( # .savefig() = Figure를 이미지로 저장
+    RESULTS / "pr_curve.png", # PR Curve 이미지 위치 = C:\projects\projectAI\GangNaengI_AI\results\pr_curve.png
+    dpi=150 # dpi = 해상도
+  )         # 해석: 1인치당 점 150개 == 픽셀이 150개
+
+  plt.show() # .show() = 그래프 출력
 
 # 11. SHAP 분석 -------------------------------------------------------------------------------------------------
 
