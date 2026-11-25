@@ -244,7 +244,7 @@ def evaluate_model(y_true, probabillities, threshold, name): # y_true = 실제 �
     "accuracy": accuracy_score(y_true, predictions), # accuracy = 정확도
                                                      # y_true   = 실제 정답라벨
                                                      # predictions = 모델 예측라벨
-    "precisions": precision_score( # precisions = 정밀도
+    "precision": precision_score( # precision = 정밀도
       y_true, predictions, zero_division=0 # y_true = 실제 정답라벨
                                            # predictions = 모델 예측라벨
                                            # zero_division = 계산 안되는 경우 0으로 나눠라
@@ -451,7 +451,7 @@ for name, info in models.items(): # name = 모델명
                                     # thresholds  = FPR TPR 계산시 사용하는 임계값 배열
                                     # roc_curve() = 여러 임계값에 따른 FPR과 TPR 계산
     y_test, # 실제 정답라벨
-    info["porb"] # info = 모델 정보
+    info["prob"] # info = 모델 정보
   )              # prob = 확률
 
   # ROC-AUC 계산
@@ -518,7 +518,7 @@ for name, info in models.items(): # name = 모델명
   # AP - 평균정밀도
   ap = average_precision_score(
     y_test, # 테스트의 정답라벨
-    info["porb"] # info = 모델 정보
+    info["prob"] # info = 모델 정보
   )              # prob = 확률            
   
   plt.plot( # .plot = 그래프
@@ -536,7 +536,7 @@ for name, info in models.items(): # name = 모델명
   plt.axhline( # .axhline() = y축에 수평선 그려라
     baseline,  # 테스트데이터의 양성비율
     color="gray", # 색상은 회색
-    linestyle="---", # 선은 점선으로
+    linestyle="--", # 선은 점선으로
     label=f"Positive Rage={baseline:.3f}" # label = 범례명 지정
   )                                       # :.3f = 소수점 3자리
                                           # : = 형식지정 | .3 = 소수점3자리 | f = 고정소수점
