@@ -89,6 +89,34 @@ torch.manual_seed(42) # manual_seed() = Pytorch 난수 생성 시드 설정
 
 # 2. 데이터 로딩 ------------------------------------------------------------------------------------------------
 
+# 테스트 데이터 불러오기
+# 테스트데이터 = C:\projects\projectAI\GangNaengI_AI\data\processed\test_data.npz
+test = np.load(PROCESSED / "test_data.npz") 
+X_test = test["X"] # 테스트데이터의 입력데이터
+y_test = test["y"] # 테스트데이터의 정답라벨
+
+# SHAP 배경 데이터: 모델 예측 결과에 따라 각 입력특성이 얼마나 기여했는가
+# SHAP 배경 데이터 = C:\projects\projectAI\GangNaengI_AI\data\processed\train_data.npz
+train = np.load(PROCESSED / "train_data.npz")
+X_train = train["X"] # 학습데이터의 입력데이터
+
+print("Test X: ", X_test.shape) # X_test = 테스트데이터의 입력데이터
+print("Test y: ", y_test.shape) # y_test = 테스트데이터의 정답라벨
+                                # .shape = 배열의 각 차원별 크기를 튜플로 반환
+                                #          ex) 출력: (100, 50)
+                                #              해석: 100행 50열
+
+assert X_test.shape == (543, 10) # assert = 조건이 맞으면 True니까 다음 코드를 실행하라
+                                 #          아니면 AssertError
+                                 # 해석: 테스트 데이터가 543행 10열이 맞느냐
+assert len(np.unique(y_test)) == 2 # len() = 길이
+                                   # .unique() = 중복된 값 제거
+assert np.isfinite(X_test).all() # .isfinite() = 배열의 원소가 유한하면 True 
+                                 #               하나라도 아니면 False 
+                                 #               ex) NaN, 무한수
+                                 # .all() = 배열의 모든 원소가 True라면 True
+                                 #          하나라도 False면 False
+
 # 3. ML모델 불러오기 --------------------------------------------------------------------------------------------
 
 # 4. DL모델 불러오기 --------------------------------------------------------------------------------------------
