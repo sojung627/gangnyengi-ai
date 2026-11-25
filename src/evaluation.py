@@ -1,45 +1,91 @@
 # 1. 라이브러리 및 경로 설정 -------------------------------------------------------------------------------------
 
-from pathlib import Path
-import sys
-import json
-import joblib
+from pathlib import Path # pathlib = 파일 및 폴더 경로 관리
+                         # Path = 파일 및 폴더 경로 생성 및 조회
+import sys # sys = 파이썬 실행환경 관리
+           #       파이썬 인터프리터 환경 관리
+           #       설치 필요없음 --> 기본 제공
+import json   # JSON
+import joblib # joblib = ML모델이나 전처리 객체를 파일로 저장 및 불러오기
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import shap
-import torch
+import numpy as np  # NumPy  = 배열 및 수치 연산
+import pandas as pd # Pandas = 표를 가공 및 분석
+import matplotlib.pyplot as plt # matplotlib = 데이터 시각화 라이브러리
+                                # pyplot = 그래프
+import shap  # shap = 모델 예측 결과에 대한 각 입력특성의 기여도 분석
+             #        요약: 어떤 입력특성이 예측값을 얼마나 높이고 낮췄는가
+import torch # torch = Pytorch
+             #         역할: Tensor 연산 및 DL모델 설계 + 학습 + 평가 기능 제공
+             #               --> Tensor: 숫자 데이터 저장 후 수학적 연산하는 다차원 배열 
+             #                           쓰임새: 사칙연산 | 행렬곱셈 | 가중치 or 편향 계산 |
+             #                                   활성화 함수 | 손실값 계산 | 미분 or 기울기 계산 |
 
-from sklearn.metrics import (
-  accuracy_score,
-  precision_score,
-  recall_score,
-  f1_score,
-  average_precision_score,
-  roc_auc_score,
-  confusion_matrix,
-  ConfusionMatrixDisplay,
-  roc_curve,
-  precision_recall_curve
-)
+from sklearn.metrics import ( # sklearn    = Scikit-learn
+                              #              뜻: ML모델 개발 및 데이터 전처리 평가
+                              # .metrics() = 모델 예측 성능 측정 및 평가
+  accuracy_score,  # 정확도 - 전체데이터 중 모델이 올바르게 예측한 비율
+  precision_score, # 정밀도 - 모델이 예측한 것 중 정답라벨인 비율
+  recall_score,    # 재현율 - 정답라벨 중 모델이 올바르게 찾아낸 비율
+  f1_score,        # F1 스코어 - 정밀도와 재현율을 조화평균 계산
+  average_precision_score, # 평균 정밀도 - 여러 임계값 중 재현율 증가량을 가중치로 사용하여 정밀도 가중평균 계산
+  roc_auc_score,    # ROC = 수산자 조작 특성
+                    # AUC = 곡선 아래 면적
+                    # roc_auc_score = ROC 곡선 아래 면적을 계산하여 모델이 양성 or 음성을 얼마나 잘구분하는지 평가
+  confusion_matrix, # 혼동행렬 - TP TN FP FN의 데이터 개수 확인
+                    # T = True(참)        P = Positive(양성)
+                    # F = False(거짓)     F = negative(음성)
+                    # TN[진음성] = 예측성공 | 실제라벨=0 예측라벨=0
+                    # TP[진양성] = 예측성공 | 실제라벨=1 예측라벨=1
+                    # FN[위음성] = 예측실패 | 실제라벨=1 예측라벨=0
+                    # FP[위양성] = 예측실패 | 실제라벨=0 에측라벨=1   
+                    
+  ConfusionMatrixDisplay, # 혼동행렬 시각화
+                          # 한마디로 눈에 보이게 하라고 == 출력하라
+  roc_curve, # ROC 곡선 체크
+             # roc_curve = 여러 임계값의 FPR과 TPR 계산
+             # FPR[위양성률] = 실제 음성인 환자를 양성으로 판단한 경우
+             #                식: FPR = FP + TN / FP
+             # TPR[진양성률] = 실제 양성인 환자를 양성으로 판단한 경우
+             #                식: TPR = TP + FN / TP
+  precision_recall_curve # 정밀도 재현율 곡선
+)                        # 여러 임계값의 정밀도와 재현율 곡선 계산
 
 # 프로젝트 최상위 폴더
-ROOT = Path(__file__).resolve().parent.parent 
+ROOT = Path(__file__).resolve().parent.parent # ROOT = C:\projects\projectAI\GangNaengI_AI
+                                              # Path = 경로 변환
+                                              # __file__  = 현재 파일 경로 
+                                              #.resolve() = 절대경로로 지정
+                                              # .parent = 부모폴더
 
-PROCESSED = ROOT / "data" / "processed"
-MODELS = ROOT / "models"
-RESULTS = ROOT / "results"
+PROCESSED = ROOT / "data" / "processed" # PROCESSED = C:\projects\projectAI\GangNaengI_AI\data\processed
+MODELS = ROOT / "models"   # MODELS  = C:\projects\projectAI\GangNaengI_AI\models
+RESULTS = ROOT / "results" # RESULTS = C:\projects\projectAI\GangNaengI_AI\results
 
-RESULTS.mkdir(parents=True, exist_ok=True)
+RESULTS.mkdir(parents=True, exist_ok=True) # .mkdir() = 폴더 생성
+                                           # parents  = 부모 폴더도 생성
+                                           # exist_ok = 이미 생성했으면 그대로
 
-# dl/models.py에서 PeroMLP 불러와라
-sys.path.insert(0, str(ROOT / "dl"))
-from model import PerioMLP
+# dl/model.py에서 PeroMLP 불러와라
+sys.path.insert(0, str(ROOT / "dl")) # sys = 파이썬 실행 환경과 관련된 기능 제공
+                                     # .path()   = 파이썬 모듈 탐색 경로
+                                     # .insert() = 리스트의 특정 인덱스에 새 원소 삽입
+                                     # str() = 문자열을 str로 변환
+
+# 신경망 불러오기
+from model import PerioMLP 
 
 # 재현성을 위한 시드
-np.random.seed(42)
-torch.manual_seed(42)
+np.random.seed(42) # .random() = 난수 생성 시드
+                   # .seed()   = NP 전역 난수 생성기의 시드 설정
+torch.manual_seed(42) # manual_seed() = Pytorch 난수 생성 시드 설정
+                      # 난수: 무작위로 생성되는 숫자
+                      # 시드: 난수 생성 초기값 --> ex) 42
+                      # DL에서 난수 필요한 이유:
+                      #   1. 신경망의 초기 가중치를 무작위로 설정하기 위해
+                      #   2. 학습데이터 순서 무작위로 섞기 위해
+                      #   3. Dropout에서 무작위로 뉴런 0으로 만들기 위해
+                      # DL에서 시드가 필요한 이유:
+                      #   1. 무작위 연산 결과를 만들어서 재현성 높일 수 있으니까
 
 # 2. 데이터 로딩 ------------------------------------------------------------------------------------------------
 
