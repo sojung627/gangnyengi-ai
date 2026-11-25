@@ -661,4 +661,74 @@ plt.show() # .show() = 그래프 출력
 
 # 13. 오분류 사례 분석 -------------------------------------------------------------------------------------------
 
+# 목적:
+# 어떤 모델이 FN을 가장 많이 발생시켰는가?
+# FP가 얼마나 발생했는가?
+# 모델이 높은 확률로 예측했는데도 틀린 사례가 있는가?
+# ML과 DL의 오류 패턴이 서로 다른가?
+
+# 오분류 결과
+error_results = []
+
+for name, info in models.items():
+  predictions = (
+    info["prob"] >= info["threshold"]
+  ).astype(int)
+
+  for i in range(len(y_test)):
+    if predictions[i] != y_test[i]:
+      error_type = (
+        "FN" if y_test[i] == 1 else "FP"
+      )
+
+      error_results.append({
+        "model": name,
+        "test_row": i,
+        "actual": int(y_test[i]),
+        "predicted": int(predictions[i]),
+        "probability": float(info["prob"][i]),
+        "error_type": error_type
+      })
+
+error_df = pd.DataFrame(error_results)
+
+print("\n=== Error Type Counts ===")
+print(
+  error_df.groupby(
+    ["model", "error_type"]
+  ).size()
+)
+
+# 오분류 결과 저장
+error_df.to_csv(
+  RESULTS / "error_analysis.csv",
+  index=False
+)
+
+print("\n === False Negative Examples ===")
+print(
+  error_df[
+    error_df["error_type"] == "FN"
+  ].head(10)
+)
+
 # 14. 결과 요약 --------------------------------------------------------------------------------------------------
+
+print("\n" + "=" * 50)
+print("GangNaengI AI - DAY 05 Evalution")
+print("=" * 50)
+
+print("\n[최종 모델 성능]")
+print(results_df.to_string(index=False))
+
+print("\n[SHAP 중요 특성 TOP 5]")
+print(shap_df.head(5).to_string(index=False))
+
+print("\n[오분류 개수]")
+print(
+  error_df.groupby(
+    ["model", "error_type"]
+  ).size()
+)
+
+print("day 05 - 모델 평가 및 분석 완료")
