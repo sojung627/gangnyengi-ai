@@ -430,6 +430,53 @@ for name, info in models.items(): # name     = 모델명
 
 # 9. ROC Curve --------------------------------------------------------------------------------------------------
 
+# ROC 곡선 = ROC Curve
+#   roc_curve = 여러 임계값의 FPR과 TPR 계산
+#   FPR[위양성률] = 실제 음성인 환자를 양성으로 판단한 경우
+#                   식: FPR = FP + TN / FP
+#   TPR[진양성률] = 실제 양성인 환자를 양성으로 판단한 경우
+#                   식: TPR = TP + FN / TP
+
+plt.figure(figsize=(9, 6))
+
+for name, info in models.items():
+  fpr, tpr, thresholds = roc_curve(
+    y_test,
+    info["porb"]
+  )
+
+  auc = roc_auc_score(
+    y_test,
+    info["prob"]
+  )
+
+  plt.plot(
+    fpr,
+    tpr,
+    label=f"{name} (AUC={auc:.3f})"
+  )
+
+# 무작위 분류 기준선
+plt.plot(
+  [0, 1],
+  [0, 1],
+  "k--",
+  label="Random Baseline"
+)  
+
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve - ML vs DL")
+plt.legend()
+plt.tight_layout()
+
+plt.savefig(
+  RESULTS / "roc_curve.png",
+  dpi=150
+)
+
+plt.show()
+
 # 10. PR Curve --------------------------------------------------------------------------------------------------
 
 # 11. SHAP 분석 -------------------------------------------------------------------------------------------------
