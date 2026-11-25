@@ -164,47 +164,67 @@ print("MLP 모델 로딩 완료")
 
 # 5. 모델 3개 예측 확률 구하기 -----------------------------------------------------------------------------------
 
-# Logistic Regression
-lr_prob = lr_model.predict_proba(X_test)[:, 1]
+# 모델 3개 
+# 1. Logistic Regression
+# 2. XGBoost
+# 3. Pytorch
 
-# XGBoost
+# Logistic Regression 예측 확률
+lr_prob = lr_model.predict_proba(X_test)[:, 1] # .predict_proba() = 에측 확률 반환
+                                               # [:, 1] = 모든 행의 인덱스 1번 열 추출
+
+# XGBoost 예측 확률
 xgb_prob = xgb_model.predict_proba(X_test)[:, 1]
 
-# Pytorch MCP
-with torch.no_grad():
-  X_tensor = torch.tensor(
+# Pytorch MCP 예측 확률
+with torch.no_grad(): # with = 특정 실행환경 설정 + 정리
+                      # no_grad() = 자동 미분 후 기록 비활성화
+                      #             사용 이유: 손실값을 줄여 가중치를 수정 시 필요
+  X_tensor = torch.tensor( # tensor() = 전달받은 데이터를 Tensor로 생성
     X_test,
     dtype=torch.float32,
     device=device
   )
+  # 활성화 함수 적용 전 모델 출력값
+  logits = mlp_model(X_tensor) # 모델 순전파 연산하라
+                               # 순전파: 입력층 -> 은닉층 -> 출력층
+                               # 로짓: 출력층에 반환된 값
+                               #       출력 활성화 함수를 적용하기 전 점수
+                               #       출력 활성화 함수: Sigmoid, Softmax
 
-  logits = mlp_model(X_tensor)
-
-  mlp_prob = torch.sigmoid(
+  # 로짓을 예측 확률로 변환
+  mlp_prob = torch.sigmoid( # .sigmoid() = 입력값을 0~1 사이 값으로 변환
     logits
-  ).cpu().numpy().ravel()
+  ).cpu().numpy().ravel() # .cpu()   = Tensor를 CPU로 이동
+                          # .numpy() = Tensor를 NP로 변환
+                          # .ravel() = 다차원 NP를 1차원 NP로
 
-# Validation의 임계값
+# 모델별 예측 확률 및 임계값 저장
 models = {
+  # 로지스틱 회귀 모델
   "Logistic Regreesion": {
-    "prob": lr_prob,
-    "threshold": 0.5
-  },
+    "prob": lr_prob, # prob = 확률
+    "threshold": 0.5 # threshold = 임계값 or 분류 기준값
+  },                 # 양성분류 기준 = 50%
+  # XGBoost 모델(앙상블)
   "XGBoost": {
-    "prob": xgb_prob,
-    "threshold": 0.5
-  },
+    "prob": xgb_prob, # prob = 확률
+    "threshold": 0.5  # threshold = 임계값 or 분류 기준값
+  },                  # 양성분류 기준 = 50%
+  # DL 모델 신경망(PyTorch)
   "PyTorch MLP": {
-    "prob": mlp_prob,
-    "threshold": 0.3
-  }
+    "prob": mlp_prob, # prob = 확률
+    "threshold": 0.3  # threshold = 임계값 or 분류 기준값
+  }                   # 양성분류 기준 = 30%
 }  
 
-for name, info in models.items():
-  print(
+# 모델별 예측 확률 개수 출력
+for name, info in models.items(): # name     = 모델명
+                                  # info     = 임계값 등등 정보
+  print(                          # .items() = dict의 key랑 value 동시 출력하라
     name,
-    "예측 확률 개수: ", len(info["prob"])
-  )
+    "예측 확률 개수: ", len(info["prob"]) # len() = 길이
+  )                                      # prob  = 확률
 
 # 6. ML DL 성능 평가 --------------------------------------------------------------------------------------------
 
