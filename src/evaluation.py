@@ -229,63 +229,84 @@ for name, info in models.items(): # name     = 모델명
 # 6. ML DL 성능 평가 --------------------------------------------------------------------------------------------
 
 # 성능 평가
-def evaluate_model(y_true, probabillities, threshold, name):
-  predictions = (
-    probabillities >= threshold
-  ).astype(int)
+def evaluate_model(y_true, probabillities, threshold, name): # y_true = 실제 정답라벨
+                                                             # probabillities = 모델 예측 확률
+                                                             # threshold = 분류 임계값
+                                                             # name = 평가할 모델명
+  # 예측확률을 분류라벨로 변환                                                           
+  predictions = ( # predictions = 예측라벨 저장
+    probabillities >= threshold # 예측확률 배열 >= 분류 임계값
+  ).astype(int) # .astype() = 타입 변환하라
 
   return {
-    "model": name,
-    "threshold": threshold,
-    "accuracy": accuracy_score(y_true, predictions),
-    "precisions": precision_score(
-      y_true, predictions, zero_division=0
+    "model": name, # 모델명
+    "threshold": threshold, # 분류 임계값
+    "accuracy": accuracy_score(y_true, predictions), # accuracy = 정확도
+                                                     # y_true   = 실제 정답라벨
+                                                     # predictions = 모델 예측라벨
+    "precisions": precision_score( # precisions = 정밀도
+      y_true, predictions, zero_division=0 # y_true = 실제 정답라벨
+                                           # predictions = 모델 예측라벨
+                                           # zero_division = 계산 안되는 경우 0으로 나눠라
     ),
-    "recall": recall_score(
-      y_true, predictions, zero_division=0
+    "recall": recall_score( # 재현율
+      y_true, predictions, zero_division=0 # y_true = 실제 정답라벨
+                                           # predictions = 모델 예측라벨
+                                           # zero_division = 계산 안되는 경우 0으로 나눠라
+    ),                        
+    "f1": f1_score( # F1 스코어
+      y_true, predictions, zero_division=0 # y_true = 실제 정답라벨
+                                           # predictions = 모델 예측라벨
+                                           # zero_division = 계산 안되는 경우 0으로 나눠라
     ),
-    "f1": f1_score(
-      y_true, predictions, zero_division=0
+    "roc_auc": roc_auc_score( # roc_auc_score() = ROC 곡선 아래 면적 계산
+      y_true, probabillities  # y_true = 실제 정답라벨
+                              # probabillities = 모델 에측확률
     ),
-    "roc_auc": roc_auc_score(
-      y_true, probabillities
-    ),
-    "average_precision": average_precision_score(
-      y_true, probabillities
-    )
+    "average_precision": average_precision_score( # average_precision = 평균 정밀도(AP)
+                                                  # 평균 정밀도: 임계값들 중 재현율 증가량을 가중치로 사용하여 
+                                                  #             정밀도 가중 평균 계산
+      y_true, probabillities # y_true = 실제 정답라벨
+    )                        # probabillities = 모델 에측확률
   }
 
-# 모델 지표 계산
-results = []
+# 모델별 성능 지표 계산
+results = [] 
 
-for name, info in models.items():
-  scores = evaluate_model(
-    y_test,
-    info["prob"],
-    info["threshold"],
-    name
+for name, info in models.items(): # name = 모델명
+                                  # info = 모델 예측확률 + 임계값
+                                  # .items() = dict의 key랑 value 반환
+  # 모델 성능 평가 결과                                 
+  scores = evaluate_model( 
+    y_test, # 테스트데이터 실제 정답라벨
+    info["prob"], # 현 모델 예측 확률
+    info["threshold"], # 현 모델 분류 임계값
+    name # 현 모델명
   )
+  # 평가 결과 추가
+  results.append(scores) # .append() = 리스트에 추가
 
-  results.append(scores)
-
-# DF 생성  
+# 모델 성능 평가 표 저장
 results_df = pd.DataFrame(results)
 
-# F1 높은 순서로 정렬
-results_df = results_df.sort_values(
-  by="f1",
-  ascending=False
-)
+# F1 높은 순서로(내림차순) 정렬
+results_df = results_df.sort_values( # .sort_values() = 지정한 열 기준으로 데이터 정렬
+  by="f1", # by = 정렬기준 설정
+           # F1 스코어 기준으로 정렬
+  ascending=False # ascending = 오름차순 or 내림차순 설정
+)                 # True = 오름차순 | False = 내림차순
 
 print("\n=== FINAL TEST RESULTS===")
-print(results_df.to_string(index=False))
+print(results_df.to_string(index=False)) # .to_string() = DF 문자열로 반환
+                                         # index = 인덱스 행 출력 여부 결정
+                                         # True =  출력 | False = 출력 x
 
 # CSV 저장
-results_df.to_csv(
-  RESULTS / "final_model_comparison.csv",
-  index=False
-)
-
+results_df.to_csv( # .to_csv() = DF에서 CSV로 변환
+  RESULTS / "final_model_comparison.csv", # 모델평가 CSV 위치 = 
+                                          # C:\projects\projectAI\GangNaengI_AI\models\final_model_comparison.csv
+  index=False # index = 인덱스 행 저장 여부 결정
+)             # True = 저장 | False = 저장 x
 
 # 7. ML DL 성능 비교 그래프 --------------------------------------------------------------------------------------
 
