@@ -437,47 +437,68 @@ for name, info in models.items(): # name     = 모델명
 #   TPR[진양성률] = 실제 양성인 환자를 양성으로 판단한 경우
 #                   식: TPR = TP + FN / TP
 
-plt.figure(figsize=(9, 6))
+plt.figure(figsize=(9, 6)) # .figure() = Figure 객체 생성
+                           # figsize   = Figure 사이즈 지정
+                           #             가로 9인치 + 세로 6인치
 
-for name, info in models.items():
-  fpr, tpr, thresholds = roc_curve(
-    y_test,
-    info["porb"]
-  )
+for name, info in models.items(): # name = 모델명
+                                  # info = 모델 예측확률 및 임계값 정보
+                                  # .items() = dict의 key와 value 반환
+  fpr, tpr, thresholds = roc_curve( # fpr = 위양성률
+                                    #       실제 음성을 양성으로 판단
+                                    # tpr = 진양성률
+                                    #       실제 양성을 양성으로 판단
+                                    # thresholds  = FPR TPR 계산시 사용하는 임계값 배열
+                                    # roc_curve() = 여러 임계값에 따른 FPR과 TPR 계산
+    y_test, # 실제 정답라벨
+    info["porb"] # info = 모델 정보
+  )              # prob = 확률
 
-  auc = roc_auc_score(
-    y_test,
-    info["prob"]
-  )
+  # ROC-AUC 계산
+  auc = roc_auc_score( # roc_auc_score() = ROC 곡선 아래 면적 계산
+    y_test, # 실제 정답라벨
+    info["prob"] # info = 모델 정보
+  )              # prob = 확률
 
-  plt.plot(
-    fpr,
-    tpr,
-    label=f"{name} (AUC={auc:.3f})"
-  )
+  # 모델별 ROC 곡선 그리기
+  plt.plot( # .plot() = 그래프 
+    fpr, # FPR = X축 데이터
+    tpr, # TPR = y축 데이터
+    label=f"{name} (AUC={auc:.3f})" # label = 범례명 지정
+  )                                 # name  = 모델명 
+                                    # {AUC:.3f} = AUC 점수를 소수점 3자리까지
+                                    # : = 출력형식지정 | .3 = 소수점 3자리 | f = 고정소수점
 
 # 무작위 분류 기준선
-plt.plot(
-  [0, 1],
-  [0, 1],
-  "k--",
-  label="Random Baseline"
+plt.plot( # .plot() = 그래프 
+  [0, 1], # [0, 1] = X축 좌표
+  [0, 1], # [0, 1] = y축 좌표
+          # 해석: 시작좌표가 0 종료좌표가 1
+  "k--",  # k-- = 검은색 점선으로 표기
+          # r- = 빨간실선 | b: = 파란점선 | g-. = 초록일점쇄선
+  label="Random Baseline" # label = 범례명 지정
 )  
 
-plt.xlabel("False Positive Rate")
-plt.ylabel("True Positive Rate")
-plt.title("ROC Curve - ML vs DL")
-plt.legend()
-plt.tight_layout()
+plt.xlabel("False Positive Rate") # .xlabel() = X축라벨 설정
+plt.ylabel("True Positive Rate")  # .ylabel() = y축라벨 설정
+plt.title("ROC Curve - ML vs DL") # .title()  = 제목 설정
+plt.legend() # .legend() = 범례 표기
+plt.tight_layout() # tight_layout() = 여백 자동 조절
 
-plt.savefig(
-  RESULTS / "roc_curve.png",
-  dpi=150
-)
+# ROC 곡선 이미지 저장
+plt.savefig( # .savefig() = Figure를 이미지로 저장
+  RESULTS / "roc_curve.png", # 이미지 위치: C:\projects\projectAI\GangNaengI_AI\results\roc_curve.png
+  dpi=150 # dpi = 해상도
+)         # 해석: 1인치당 150 픽셀(= 점이 150개)
 
-plt.show()
+plt.show() # 그래프 출력
 
 # 10. PR Curve --------------------------------------------------------------------------------------------------
+
+# PR Curve = 정밀도와 재현율 관계를 보여줌
+#            양성과 음성을 얼마나 잘 구분하는지 알 수 있음
+
+
 
 # 11. SHAP 분석 -------------------------------------------------------------------------------------------------
 
