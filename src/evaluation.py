@@ -371,44 +371,58 @@ plt.show() # 그래프 출력
 #   FN[위음성] = 예측실패 | 실제라벨=1 예측라벨=0 | 양성을 음성으로 예측
 #   FP[위양성] = 예측실패 | 실제라벨=0 에측라벨=1 | 음성을 양성으로 예측 
 
-for name, info in models.items():
-  y_pred = (
-    info["prob"] >= info["threshold"]
-  ).astype(int)
+for name, info in models.items(): # name     = 모델명
+                                  # info     = 모델 정보
+                                  # .items() = dict의 Key와 Value 반환
+  y_pred = ( # y_pred = 예측라벨
+    info["prob"] >= info["threshold"] # prob = 모델 예측확률 배열
+                                      # threshold = 모델 분류 임계값
+  ).astype(int) # .astype() = 배열을 자료형으로 변환
 
+  # 혼동행렬 생성 - 실제 라벨과 예측라벨 비교
   cm = confusion_matrix(
-    y_test,
-    y_pred,
-    labels=[0, 1]
-  )
+    y_test, # 테스트데이터의 정답라벨
+    y_pred, # 모델의 예측라벨
+    labels=[0, 1] # labels = 라벨 배치 순서
+  )               # [0, 1] = 음성에서 양성 순으로 배치
+                  # [1, 0] = 양성에서 음성 순으로 배치
 
-  disp = ConfusionMatrixDisplay(
-    confusion_matrix=cm,
-    display_labels=["Negative", "Positive"]
-  )
+  # 혼동행렬 시각화
+  disp = ConfusionMatrixDisplay( # ConfusionMatrixDisplay = 혼동행렬 시각화
+    confusion_matrix=cm, # confusion_matrix = 시각화할 혼동행렬 전달
+    display_labels=["Negative", "Positive"] # display_labels = 그래프의 라벨명 지정
+  )                                         # 라벨명: Negative = 음성 | Positive = 양성
 
-  disp.plot(
-    cmap="Blues",
-    values_format="d"
-  )
+  disp.plot( # .plot() = 그래프 그려라
+    cmap="Blues", # cmap = Color Map
+                  # Color Map = 데이터 수치에 따라 색상 정함
+                  #             ex) 진한파랑, 중간파랑, 연한파랑 ... 
+    values_format="d" # values_format = 혼동행렬 내부 숫자 출력 형식 지정
+  )                   # d = 십진정수 형식
 
-  plt.title(f"{name} - Confusion Matrix")
-  plt.tight_layout()
+  plt.title(f"{name} - Confusion Matrix") # .title() = 그래프 제목
+  plt.tight_layout() # tight_layout() = 그래프 여백 자동 조절
 
+  # 이미지 파일명 지정
   filename = (
-    name.lower()
-    .replace(" ", "_")
-    + "_confusion_matrix.png"
-  )
+    name.lower() # .lower() = 소문자
+                 # .upper() = 대문자
+    .replace(" ", "_") # .replace() = 문자열 바꿔라
+                       # 해석: 빈칸을 _로 바꿔라
+    + "_confusion_matrix.png" # 해석: 맨 끝은 _confusion_matrix.png 이걸로 지정하라
+  )                           # ex) logistic_regression_confusion_matrix.png
+                              #     xgboost_confusion_matrix.png
+                              #     pytorch_mlp_confusion_matrix.png
 
-  plt.savefig(
-    RESULTS / filename,
-    dpi=150
-  )
+  plt.savefig( # .savefig() = 현 Figure를 이미지로 바꿔 저장
+    RESULTS / filename, # 이미지 위치 = C:\projects\projectAI\GangNaengI_AI\results\파일이미지명
+    dpi=150 # dpi = 해상도
+  )         # 해석: 1인치당 점 150개의 해상도
 
-  plt.show()
+  plt.show() # 그래프 출력
 
-  tn, fp, fn, tp = cm.ravel()
+  # 혼동행렬 TN FP FN TP 추출
+  tn, fp, fn, tp = cm.ravel() # .ravel() = 다차원 NP를 일차원 NP로 바꿔라
 
   print(f"\n{name}")
   print(f"TP: {tp}, TN: {tn}")
