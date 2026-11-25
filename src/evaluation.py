@@ -137,23 +137,28 @@ print("ML 모델 로딩 완료")
 
 # 4. DL모델 불러오기 --------------------------------------------------------------------------------------------
 
-# 디바이스 부르기
-device = torch.device("cpu")
+# 디바이스 결정
+device = torch.device("cpu") # CPU 써라
 
 mlp_model = PerioMLP(
-  input_dim=X_test.shape[1]
-).to(device)
+  input_dim=X_test.shape[1] # input_dim = 신경망의 특성개수 전달
+                            # .shape    = 배열 차원의 크기를 튜플로 변환 
+                            #             ex) 출력: (100, 50)
+                            #                 해석: 100행 50열
+                            # .shape[1] = 인덱스가 1인 값들 가져와라
+).to(device) # .to() = 모델 or Tensor를 CPU로 이동
 
-state_dict = torch.load(
-  MODELS / "mlp_model.pth",
-  map_location=device,
-  weights_only=True
-)
+# 학습모델 상태 불러오기
+state_dict = torch.load( # load() = 저장한 파일을 저장한 객체로 불러라
+  MODELS / "mlp_model.pth", # 학습모델 위치 = C:\projects\projectAI\GangNaengI_AI\models\mlp_model.pth
+  map_location=device, # map_location = 저장된 Tensor를 해당 연산장치로 보내라
+  weights_only=True    # weights_only = 파일 불러올 때 기본객체만 불러라
+)                      # True = 기본자료형만 / False = 기본자료형 말고도
 
-mlp_model.load_state_dict(state_dict)
+mlp_model.load_state_dict(state_dict) # .load_state_dict() = 모델 상태를 신경망에 적용
 
-# 평가모드
-mlp_model.eval()
+# 신경망 평가모드
+mlp_model.eval() # 평가모드 = Dropout 비활성화 | 모델 평가 및 예측 | 기울기 계산(설정에 따라 가능)
 
 print("MLP 모델 로딩 완료")
 
