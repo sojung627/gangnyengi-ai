@@ -162,7 +162,49 @@ mlp_model.eval() # 평가모드 = Dropout 비활성화 | 모델 평가 및 예�
 
 print("MLP 모델 로딩 완료")
 
-# 5. 3개 모델 예측 확률 구하기 -----------------------------------------------------------------------------------
+# 5. 모델 3개 예측 확률 구하기 -----------------------------------------------------------------------------------
+
+# Logistic Regression
+lr_prob = lr_model.predict_proba(X_test)[:, 1]
+
+# XGBoost
+xgb_prob = xgb_model.predict_proba(X_test)[:, 1]
+
+# Pytorch MCP
+with torch.no_grad():
+  X_tensor = torch.tensor(
+    X_test,
+    dtype=torch.float32,
+    device=device
+  )
+
+  logits = mlp_model(X_tensor)
+
+  mlp_prob = torch.sigmoid(
+    logits
+  ).cpu().numpy().ravel()
+
+# Validation의 임계값
+models = {
+  "Logistic Regreesion": {
+    "prob": lr_prob,
+    "threshold": 0.5
+  },
+  "XGBoost": {
+    "prob": xgb_prob,
+    "threshold": 0.5
+  },
+  "PyTorch MLP": {
+    "prob": mlp_prob,
+    "threshold": 0.3
+  }
+}  
+
+for name, info in models.items():
+  print(
+    name,
+    "예측 확률 개수: ", len(info["prob"])
+  )
 
 # 6. ML DL 성능 평가 --------------------------------------------------------------------------------------------
 
