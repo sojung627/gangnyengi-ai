@@ -320,29 +320,44 @@ metrics = [
   "average_precision" # 평균 정밀도
 ]
 
-plot_df = results_df.set_index("model")[metrics] # .set_index()[] = 
+plot_df = results_df.set_index("model")[metrics] # .set_index() = 특정 열을 행 인덱스로 지정
+                                                 # [metrics] = metrics 리스트에 포함된 열만 추출
 
-ax = plot_df.T.plot( # .T =
-                     # .plot() = 
-  kind = "bar", # kind = 
+ax = plot_df.T.plot( # .T = Transpose(전치)
+                     #      행과 열을 서로 교환
+                     # .plot() = DF 그래프 시각화
+  kind="bar", # kind = 그래프 종류 설정
+              # bar  = 믹대그래프 
   figsize=(11, 6), # figsize = 그래프 사이즈
                    # --> 그래프 가로 11인치 + 세로 6인치
-  rot = 0 # rot = 
-)
+  rot=0 # rot = Rotation
+)       #       X축 눈금 라벨 회전 각도
+        #       딱히 성능은 아니고 이름이 어떻게 나오느냐임(디자인적 영역)
+        #       이름        름
+        #                 이
+        #       이런 정도?
+        # rot=0 = 눈금 라벨 회전 x
 
-ax.set_title("ML DL Model Comparison") # ax = 
+# 그래프 디자인
+ax.set_title("ML DL Model Comparison") # ax = Axes 객체 저장할 변수
+                                       # Axes = Matplotlib의 그래프의 영역 관리
+                                       #        한마디로 디자인적인 영역
                                        # set_title() = 그래프 제목
 ax.set_ylabel("score") # set_ylabel() = y 라벨 설정
-ax.set_ylim(0, 1) # set_ylim() =
-ax.legend(title="Model") # .legand() = 
-                         # title = 
+ax.set_ylim(0, 1) # set_ylim() = y축의 표시 범위 설정
+                  #              lim = limit
+ax.legend(title="Model") # .legand() = 그래프 범례 표시 및 설정
+                         # title = 범례 제목 설정
+                         # 범례: 그래프의 색상 및 기호가 무엇인지 알려줌
+                         #       ex) 초록색 막대그래프 = 식물의 키
+                         #           갈색 막대그래프   = 나무의 키
 plt.tight_layout() # plt = 그래프
                    # tight_layout() = 여백 자동 조절
-plt.savefig( # savefig() =
+plt.savefig( # savefig() = 현 figure를 이미지로 저장
   RESULTS / "model_comparision.png", # 성능 비교 그래프 사진 =
                                      # C:\projects\projectAI\GangNaengI_AI\results\model_comparision.png
-  dpi=150 # dpi =                                   
-)                 
+  dpi=150 # dpi = 이미지 해상도                              
+)         # 1인치당 150개의 점으로 구성된 해상도
 
 plt.show() # 그래프 출력       
 
