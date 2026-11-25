@@ -94,24 +94,24 @@ GangNaengI_AI/
 ✅ 결측치 및 클래스 분포 분석
 
 **11/22 - 전처리 및 학습 데이터 구축**
-✅치주질환 라벨 정의 및 생성
-✅데이터 누수 방지, 학습·검증·테스트 분리
-✅인코딩·스케일링 파이프라인 구현
+✅ 치주질환 라벨 정의 및 생성
+✅ 데이터 누수 방지, 학습·검증·테스트 분리
+✅ 인코딩·스케일링 파이프라인 구현
 
 **11/23 - ML 모델 개발**
-ㅁ Logistic Regression 베이스라인
-ㅁ XGBoost 모델 학습 및 튜닝
-ㅁ F1·Recall·PR-AUC 비교
+✅ Logistic Regression 베이스라인
+✅ XGBoost 모델 학습 및 튜닝
+✅ F1·Recall·PR-AUC 비교
 
 **11/24 - DL 모델 개발**
-ㅁ PyTorch MLP 신경망 설계
-ㅁ 학습·검증 루프 및 Early Stopping
-ㅁ 학습 곡선과 모델 저장
+✅ PyTorch MLP 신경망 설계
+✅ 학습·검증 루프 및 Early Stopping
+✅ 학습 곡선과 모델 저장
 
 **11/25 - 모델 평가 및 분석**
-ㅁ 공통 테스트셋으로 ML/DL 비교
-ㅁ Confusion Matrix 및 ROC/PR Curve
-ㅁ SHAP 분석 및 오류 사례 정리
+✅공통 테스트셋으로 ML/DL 비교
+✅ Confusion Matrix 및 ROC/PR Curve
+✅ SHAP 분석 및 오류 사례 정리
 
 **11/26 - API 및 웹 구현**
 ㅁ FastAPI 예측 엔드포인트 구현

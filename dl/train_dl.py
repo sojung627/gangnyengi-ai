@@ -365,10 +365,33 @@ with torch.no_grad(): # with = 특정 범위로 제한
                             # .numpy() = Tensor를 --> NumPy로
                             # .ravel() = 다차원 NP를 --> 일차원 NP로
 
-predictions = (probabilities >= 0.5).astype(int) # predictions   = 예측라벨 저장
+predictions = (probabilities >= 0.3).astype(int) # predictions   = 예측라벨 저장
                                                  # probabilities = 시그모이드 함수로 변환된 치주질환 예측 확률
                                                  # 0.5 = 치주질환으로 인정하는 임계값
                                                  # .astype() = 타입 설정
+
+# 임계값 성능 비교(임시코드)
+# for threshold in [0.2, 0.3, 0.4, 0.5, 0.6]:
+#    pred = (probabilities >= threshold).astype(int) 
+   
+#    precision = precision_score(
+#       y_val, pred, zero_division=0
+#    )                              
+   
+#    recall = recall_score(
+#       y_val, pred, zero_division=0
+#    )                  
+
+#    f1 = f1_score(
+#       y_val, pred, zero_division=0
+#    )
+
+#    print(
+#       f"Threshold: {threshold:.1f} | "
+#       f"Precision: {precision:.4f} | "
+#       f"Recall: {recall:.4f} | "
+#       f"F1: {f1:.4f}"
+#    )
 
 # 성능 계산
 scores = {
