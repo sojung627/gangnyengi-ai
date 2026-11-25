@@ -110,7 +110,7 @@ GangNaengI_AI/
 
 **11/25 - 모델 평가 및 분석**
 ✅공통 테스트셋으로 ML/DL 비교
-✅ Confusion Matrix 및 ROC/PR Curve
+✅ Confusion Matrix 및 ROC/PR Curve 
 ✅ SHAP 분석 및 오류 사례 정리
 
 **11/26 - API 및 웹 구현**
