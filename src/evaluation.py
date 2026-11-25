@@ -228,6 +228,65 @@ for name, info in models.items(): # name     = 모델명
 
 # 6. ML DL 성능 평가 --------------------------------------------------------------------------------------------
 
+# 성능 평가
+def evaluate_model(y_true, probabillities, threshold, name):
+  predictions = (
+    probabillities >= threshold
+  ).astype(int)
+
+  return {
+    "model": name,
+    "threshold": threshold,
+    "accuracy": accuracy_score(y_true, predictions),
+    "precisions": precision_score(
+      y_true, predictions, zero_division=0
+    ),
+    "recall": recall_score(
+      y_true, predictions, zero_division=0
+    ),
+    "f1": f1_score(
+      y_true, predictions, zero_division=0
+    ),
+    "roc_auc": roc_auc_score(
+      y_true, probabillities
+    ),
+    "average_precision": average_precision_score(
+      y_true, probabillities
+    )
+  }
+
+# 모델 지표 계산
+results = []
+
+for name, info in models.items():
+  scores = evaluate_model(
+    y_test,
+    info["prob"],
+    info["threshold"],
+    name
+  )
+
+  results.append(scores)
+
+# DF 생성  
+results_df = pd.DataFrame(results)
+
+# F1 높은 순서로 정렬
+results_df = results_df.sort_values(
+  by="f1",
+  ascending=False
+)
+
+print("\n=== FINAL TEST RESULTS===")
+print(results_df.to_string(index=False))
+
+# CSV 저장
+results_df.to_csv(
+  RESULTS / "final_model_comparison.csv",
+  index=False
+)
+
+
 # 7. ML DL 성능 비교 그래프 --------------------------------------------------------------------------------------
 
 # 8. Confusion Matrix 생성 --------------------------------------------------------------------------------------
