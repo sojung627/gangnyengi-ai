@@ -260,6 +260,7 @@ def evaluate_model(y_true, probabillities, threshold, name): # y_true = 실제 �
                                            # zero_division = 계산 안되는 경우 0으로 나눠라
     ),
     "roc_auc": roc_auc_score( # roc_auc_score() = ROC 곡선 아래 면적 계산
+                              # 추가한 이유: 양성사례가 음성사례보다 높은예측점수 받는 경우 평가하기 위해서
       y_true, probabillities  # y_true = 실제 정답라벨
                               # probabillities = 모델 에측확률
     ),
@@ -309,6 +310,41 @@ results_df.to_csv( # .to_csv() = DF에서 CSV로 변환
 )             # True = 저장 | False = 저장 x
 
 # 7. ML DL 성능 비교 그래프 --------------------------------------------------------------------------------------
+
+# 그래프 표기할 것들
+metrics = [
+  "precision", # 재현율
+  "recall",    # 재현율
+  "f1",        # F1 스코어
+  "roc_auc",   # ROC 곡선 아래 면적 계산
+  "average_precision" # 평균 정밀도
+]
+
+plot_df = results_df.set_index("model")[metrics] # .set_index()[] = 
+
+ax = plot_df.T.plot( # .T =
+                     # .plot() = 
+  kind = "bar", # kind = 
+  figsize=(11, 6), # figsize = 그래프 사이즈
+                   # --> 그래프 가로 11인치 + 세로 6인치
+  rot = 0 # rot = 
+)
+
+ax.set_title("ML DL Model Comparison") # ax = 
+                                       # set_title() = 그래프 제목
+ax.set_ylabel("score") # set_ylabel() = y 라벨 설정
+ax.set_ylim(0, 1) # set_ylim() =
+ax.legend(title="Model") # .legand() = 
+                         # title = 
+plt.tight_layout() # plt = 그래프
+                   # tight_layout() = 여백 자동 조절
+plt.savefig( # savefig() =
+  RESULTS / "model_comparision.png", # 성능 비교 그래프 사진 =
+                                     # C:\projects\projectAI\GangNaengI_AI\results\model_comparision.png
+  dpi=150 # dpi =                                   
+)                 
+
+plt.show() # 그래프 출력       
 
 # 8. Confusion Matrix 생성 --------------------------------------------------------------------------------------
 
