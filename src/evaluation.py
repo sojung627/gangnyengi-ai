@@ -34,10 +34,10 @@ from sklearn.metrics import ( # sklearn    = Scikit-learn
   confusion_matrix, # 혼동행렬 - TP TN FP FN의 데이터 개수 확인
                     # T = True(참)        P = Positive(양성)
                     # F = False(거짓)     F = negative(음성)
-                    # TN[진음성] = 예측성공 | 실제라벨=0 예측라벨=0
-                    # TP[진양성] = 예측성공 | 실제라벨=1 예측라벨=1
-                    # FN[위음성] = 예측실패 | 실제라벨=1 예측라벨=0
-                    # FP[위양성] = 예측실패 | 실제라벨=0 에측라벨=1   
+                    # TN[진음성] = 예측성공 | 실제라벨=0 예측라벨=0 | 음성을 음성으로 예측
+                    # TP[진양성] = 예측성공 | 실제라벨=1 예측라벨=1 | 양성을 양성으로 예측
+                    # FN[위음성] = 예측실패 | 실제라벨=1 예측라벨=0 | 음성을 양성으로 예측
+                    # FP[위양성] = 예측실패 | 실제라벨=0 에측라벨=1 | 양성을 음성으로 예측
                     
   ConfusionMatrixDisplay, # 혼동행렬 시각화
                           # 한마디로 눈에 보이게 하라고 == 출력하라
@@ -338,7 +338,6 @@ ax = plot_df.T.plot( # .T = Transpose(전치)
         #       이런 정도?
         # rot=0 = 눈금 라벨 회전 x
 
-# 그래프 디자인
 ax.set_title("ML DL Model Comparison") # ax = Axes 객체 저장할 변수
                                        # Axes = Matplotlib의 그래프의 영역 관리
                                        #        한마디로 디자인적인 영역
@@ -362,6 +361,58 @@ plt.savefig( # savefig() = 현 figure를 이미지로 저장
 plt.show() # 그래프 출력       
 
 # 8. Confusion Matrix 생성 --------------------------------------------------------------------------------------
+
+# Confusion Matrix = 혼동행렬
+# 혼동행렬 - TP TN FP FN의 데이터 개수 확인
+#   T = True(참)        P = Positive(양성)
+#   F = False(거짓)     F = negative(음성)
+#   TN[진음성] = 예측성공 | 실제라벨=0 예측라벨=0 | 음성을 음성으로 예측
+#   TP[진양성] = 예측성공 | 실제라벨=1 예측라벨=1 | 양성을 양성으로 예측
+#   FN[위음성] = 예측실패 | 실제라벨=1 예측라벨=0 | 양성을 음성으로 예측
+#   FP[위양성] = 예측실패 | 실제라벨=0 에측라벨=1 | 음성을 양성으로 예측 
+
+for name, info in models.items():
+  y_pred = (
+    info["prob"] >= info["threshold"]
+  ).astype(int)
+
+  cm = confusion_matrix(
+    y_test,
+    y_pred,
+    labels=[0, 1]
+  )
+
+  disp = ConfusionMatrixDisplay(
+    confusion_matrix=cm,
+    display_labels=["Negative", "Positive"]
+  )
+
+  disp.plot(
+    cmap="Blues",
+    values_format="d"
+  )
+
+  plt.title(f"{name} - Confusion Matrix")
+  plt.tight_layout()
+
+  filename = (
+    name.lower()
+    .replace(" ", "_")
+    + "_confusion_matrix.png"
+  )
+
+  plt.savefig(
+    RESULTS / filename,
+    dpi=150
+  )
+
+  plt.show()
+
+  tn, fp, fn, tp = cm.ravel()
+
+  print(f"\n{name}")
+  print(f"TP: {tp}, TN: {tn}")
+  print(f"FP: {fp}, FN: {fn}")
 
 # 9. ROC Curve --------------------------------------------------------------------------------------------------
 
