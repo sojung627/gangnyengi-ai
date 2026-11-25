@@ -119,6 +119,22 @@ assert np.isfinite(X_test).all() # .isfinite() = 배열의 원소가 유한하�
 
 # 3. ML모델 불러오기 --------------------------------------------------------------------------------------------
 
+# 로지스틱 회귀 모델 불러오기
+# ML 위치 = C:\projects\projectAI\GangNaengI_AI\models\logistic_regression.joblib
+lr_model = joblib.load( # joblib  = 객체를 파일에 저장하거나 불러오기
+                        #           쓰임새: ML모델이나 NP 배열 및 전처리 객체 저장용
+                        # .load() = 파일에 저장된 객체들 불러오기
+  MODELS / "logistic_regression.joblib"
+)
+
+# XGBoost 모델 불러오기
+# ML 위치 = C:\projects\projectAI\GangNaengI_AI\models\xgboost.joblib
+xgb_model = joblib.load(
+  MODELS / "xgboost.joblib"
+)
+
+print("ML 모델 로딩 완료")
+
 # 4. DL모델 불러오기 --------------------------------------------------------------------------------------------
 
 # 5. 3개 모델 예측 확률 구하기 -----------------------------------------------------------------------------------
