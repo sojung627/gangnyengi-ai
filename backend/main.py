@@ -1,5 +1,8 @@
 # 1. 라이브러리 및 경로 설정 ------------------------------------------------------------------------------------------
 
+import os # os = 운영체제 관련 기능
+from dotenv import load_dotenv # dotenv = .env 파일 환경변수 불러오기
+                               # load_dotenv = .env 환경변수 실행환경에 로딩
 from pathlib import Path # pathlib = 파일 및 폴더 경로 관리
                          # Path = 파일 및 폴더 경로 생성
 from contextlib import asynccontextmanager # contextlib = 컨텍스트 관리자 생성 및 관리
@@ -125,7 +128,48 @@ async def lifespan(app: FastAPI): # async def  = 비동기 함수
 
 # 3. FastAPI와 CORS 설정 ---------------------------------------------------------------------------------------------
 
+# FastAPI 앱 생성
+app = FastAPI( # FastAPI() = FastAPI 객체 저장
+  title="GangnaengI AI", # title = API 제목
+  description="Periodontal finding classification API", # description = API 설명
+  version="1.0.0",  # version  = API 버전
+  lifespan=lifespan # lifespan[왼쪽]   = 서버 생명주기 관리 함수 지정
+)                   # lifespan[오른쪽] = 서버 시작 및 종료 
+
+# .env 불러오기
+load_dotenv(ROOT / ".env") # load_dotenv() = .env 환경변수 실행환경에 로딩
+
+# 허용할 프론트엔드 주소
+CORS_ORIGINS = [ # CORS_ORIGINS = .env 변수
+                 #                --> 웹 도메인
+  origin.strip() # origin   = 출처들
+                 # .strip() = 공백 및 줄바꿈 제거
+  for origin in os.getenv("CORS_ORIGINS", "").split(",") # origin = 출처들
+                                                         # os = 운영체제 및 환경변수 관리
+                                                         # .getenv() = 환경변수 값 가져오기
+                                                         # .split(",") = , 제거 
+  if origin.strip() # .strip() = 공백 및 줄바꿈 제거
+]
+
+# CORS 설정
+# CORS - 웹이 다른 출처를 서버에 요청할 수 있는가를 제어하는 정책 중 하나
+app.add_middleware( # app = FastAPI 애플리케이션
+                    # .add_middleware() = 애플리케이션 미들웨어 추가
+  CORSMiddleware, # CORSMiddleware = CORS 정책 설정 및 처리
+  allow_origins=CORS_ORIGINS, # allow_origins = 허용할 출처
+  allow_methods=["GET", "POST"], # allow_methods = 허용할 HTTP 메서드 지정
+  allow_headers=["Content-Type"] # allow_headers = 허용할 요청 헤더 지정
+)
+
 # 4. 서버 상태 확인 API ----------------------------------------------------------------------------------------------
+
+# 서버상태 확인
+@app.get("/health")
+def health():
+  return{
+    "status": "ok",
+    "model_loaded": len(artifacts) == 4
+  }
 
 # 5. 예측결과 변환 ---------------------------------------------------------------------------------------------------
 
