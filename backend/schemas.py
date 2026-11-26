@@ -20,7 +20,7 @@ class PredictionInput(BaseModel): # PredictionInput = 예측 입력데이터 구
   gender: Literal[1, 2] # Literal = 입력 가능한 값 설정
                         # [1, 2]  = 허용되는 값
   # 흡연경험 유무 - 유[1] | 무[2]                      
-  evar_smoked: Literal[1, 2] # Literal = 입력 가능한 값 설정
+  ever_smoked: Literal[1, 2] # Literal = 입력 가능한 값 설정
                              # [1, 2]  = 허용되는 값
   # 현재흡연 빈도 - 매일[1] | 가끔[2] | 안함[3]
   smoking_frequency: Literal[1, 2, 3] | None = None # Literal    = 입력 가능한 값 설정
@@ -54,7 +54,7 @@ class PredictionInput(BaseModel): # PredictionInput = 예측 입력데이터 구
     # 흡연경험이 없다면
     if self.ever_smoked == 2:
       # 흡연 빈도를 입력하지 않았다면
-      if self.smoking_frequency is None:
+      if self.smoking_frequency is not None:
         # 흡연경험이 없고 흡연빈도 입력 안했다면 강제 에러
         raise ValueError( # raise = 강제 발생
                           # ValueError = 이상한 값에 대한 에러
@@ -86,8 +86,8 @@ class ModelPrediction(BaseModel): # ModelPrediction = 모델 1개당 예측 결�
 class PredictionResponse(BaseModel): # PredictionResponse = 모델 3개 전부 예측 결과
                                      # BaseModel = 데이터 정의 및 검증
   # 로지스틱 회귀 모델
-  logisic_regression: ModelPrediction # logisic_regression = 로지스틱 회귀 모델
-                                      # ModelPrediction = 모델 1개당 예측 결과
+  logistic_regression: ModelPrediction # logisic_regression = 로지스틱 회귀 모델
+                                       # ModelPrediction = 모델 1개당 예측 결과
   # XGBoost 모델
   xgboost: ModelPrediction # xgboost = XGBoost 모델(앙상블 모델)
                            # ModelPrediction = 모델 1개당 예측 결과

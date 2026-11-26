@@ -126,6 +126,12 @@ async def lifespan(app: FastAPI): # async def  = 비동기 함수
 
   print("GangnaengI AI 모델 로딩 종료")
 
+  # 서버 실행
+  yield
+
+  # 서버 종료 시 모델 및 전처리 객체 제거
+  artifacts.clear()
+
 # 3. FastAPI와 CORS 설정 ---------------------------------------------------------------------------------------------
 
 # FastAPI 앱 생성
@@ -230,6 +236,9 @@ def predict(data: PredictionInput): # data = 사용자 입력 데이터 전달
   # RIAGENDR = 성별                | 남성[1]  여성[2]
   # SMQ020   = 평생 흡연 100개 이상 | YES[1]   NO[2]
   # SMQ040   = 현재 흡연빈도        | 매일[1]  가끔[2]  안함[3]
+  
+  # 전처리 객체의 NaN 자료형 대체 
+  input_df = input_df.astype(np.float64)
   
   # 기존 전처리 객체 적용
   X = artifacts["preprocessor"].transform( # artifacts = 학습된 모델 및 전처리 객체 보관
