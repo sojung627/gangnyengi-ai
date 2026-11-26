@@ -7,8 +7,19 @@ export const predictionFormSchema = z.object({
     (v) => /^\d+$/.test(v) && Number(v) >= 30 && Number(v) <= 80,
     "지원 연령은 30~80세야.",
   ),
-  gender: z.string().refine((v) => v === "1" || v === "2", "성별을 선택해 줘."),
-  everSmoked: z.string().refine((v) => v === "1" || v === "2", "흡연 경험을 선택해 줘."),
+  gender: z.string()
+  .min(1, "성별을 선택해 줘.")
+  .refine(
+    (v) => ["1", "2"].includes(v),
+    "성별 입력값을 확인해 줘."
+  ),
+
+  everSmoked: z.string()
+  .min(1, "흡연 경험을 선택해 줘.")
+  .refine(
+    (v) => ["1", "2"].includes(v),
+    "흡연 경험 입력값을 확인해 줘."
+  ),
   smokingFrequency: z.string(),
 }).superRefine((data, ctx) => {
   if (data.everSmoked === "1" && !["1", "2", "3"].includes(data.smokingFrequency)) {
