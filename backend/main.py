@@ -50,51 +50,75 @@ artifacts = {}
 # 2. 학습된 모델 불러오기 ---------------------------------------------------------------------------------------------
 
 # 서버시작 시 모델 로딩
-@asynccontextmanager
-async def lifespan(app: FastAPI):
+@asynccontextmanager # @ = 데코레이터(추가 기능)
+                     # asynccontextmanager = 비동기 컨텍스트 관리
+async def lifespan(app: FastAPI): # async def  = 비동기 함수
+                                  # lifespan() = 서버와 시작 종료 관리
+                                  # app = FastAPI 애플리케이션 전달
+                                  # FastAPI = Python API 서버
   # 전처리 객체
-  preprocessor = joblib.load(
-    MODELS / "preprocessor.joblib"
+  preprocessor = joblib.load( # joblib  = 파이썬객체 or ML모델 저장하거나 불러옴 
+                              # .load() = 객체 불러옴
+    MODELS / "preprocessor.joblib" # 전처리파일 겅로 = C:\projects\projectAI\GangNaengI_AI\models\preprocessor.joblib
   )
 
   # 로지스틱 회귀 모델
-  lr_model = joblib.load(
-    MODELS / "logistic_regression.joblib"
-  )
+  lr_model = joblib.load( # joblib  = 파이썬객체 or ML모델 저장하거나 불러옴
+                          # .load() = 객체 불러옴
+    MODELS / "logistic_regression.joblib" # 로지스틱회귀모델 = 
+  )                                       # C:\projects\projectAI\GangNaengI_AI\models\logistic_regression.joblib
 
   # XGBoost
-  xgb_model = joblib.load(
-    MODELS / "xgboost.joblib"
-  )
+  xgb_model = joblib.load( # joblib  = 파이썬객체 or ML모델 저장하거나 불러옴
+                           # .load() = 객체 불러옴
+    MODELS / "xgboost.joblib" # XGBoost모델 경로 =
+  )                           # C:\projects\projectAI\GangNaengI_AI\models\xgboost.joblib
 
   # 전처리 후 입력특성개수
-  input_dim = len(
-    preprocessor.get_feature_names_out()
-  )
+  input_dim = len( # input_dim = 모델 입력특성개수 저장
+                   # len() = 길이
+    preprocessor.get_feature_names_out() # preprocessor = 학습할 때 사용한 전처리
+  )                                      # .get_feature_names_out() = 전처리 이후 출력 특성명 반환
 
   # 파이토치 MLP
-  mlp_model = PerioMLP(
-    input_dim=input_dim
+  mlp_model = PerioMLP( # mlp_model = MLP 모델
+                        # PeroMLP   = 치주질환 예측용 인공신경망
+    input_dim=input_dim # input_dim = 모델 입력특성개수 저장
   )
 
-  #
-  state_dict = torch.load(
-    MODELS / "mlp_model.pth",
-    map_location="cpu",
-    weights_only=True
-  )
+  # 학습된 가중치 로딩
+  state_dict = torch.load( # state_dict = 학습된 가중치
+                           # .torch  = PyTorch
+                           # .load() = 객체 불러옴
+    MODELS / "mlp_model.pth", # 학습된 가중치 경로 = C:\projects\projectAI\GangNaengI_AI\models\mlp_model.pth
+    map_location="cpu", # map_location = 데이터 불러올 장치
+    weights_only=True   # weights_only = 제한된 역직렬화 방식 사용 여부
+  )                     # 직렬화: 프로그램 사용하는 객체를 저장하거나 전송할 수 있는 형태로 반환
+                        # 역직렬화: 저장된 데이터를 다시 프로그램에 사용할 수 객체로 복원
 
-  #
-  mlp_model.load_state_dict(state_dict)
-  #
-  mlp_model.eval()
+  # 가중치 적용
+  mlp_model.load_state_dict(state_dict) # mlp_model = MLP 모델
+                                        # .load_state_dict() = 모델에 저장된 상태 적용
+                                        # state_dict = 가중치 적용
+  
+  # MLP 모델 평가모드로 전환
+  mlp_model.eval() # mlp_model = MLP 모델
+                   # .eval() = 평가모드
+                   # 모드 종류:
+                   # train() = 학습모드
+                   #           Dropout 활성화
+                   #           현재를 통계에 사용
+                   # eval()  = 평가모드
+                   #           Dropout 비활성화
+                   #           저장된 통계에 사용         
 
   # 모델 저장
-  artifacts.update({
-    "preprocessor": preprocessor,
-    "lr": lr_model,
-    "xgb": xgb_model,
-    "mlp": mlp_model
+  artifacts.update({ # artifacts = 모델 및 전처리 객체 보관
+                     # .update() = 새로운 key와 value 추가
+    "preprocessor": preprocessor, # preprocessor = 전처리 객체
+    "lr": lr_model,   # lr  = 로지스틱회귀 모델
+    "xgb": xgb_model, # xgb = XGBoost 모델
+    "mlp": mlp_model  # mlp = MLP 모델
   })
 
   print("GangnaengI AI 모델 로딩 종료")
