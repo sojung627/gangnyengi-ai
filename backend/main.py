@@ -202,22 +202,27 @@ def format_prediction(probability):
 
 # 6. 핵심 API -------------------------------------------------------------------------------------------------------
 
-# 모델 예측 API
-@app.post(
-  "/predict",
-  response_model=PredictionResponse
+# 모델 예측 API 설정
+@app.post( # @ = 데코레이터
+           # .post() = post로 요청
+  "/predict", # /predict = 모델예측 주소
+  response_model=PredictionResponse # response_model = API 응답 구조 정의
+                                    # PredictionResponse = 모델 3개 예측 응답 구조 정의 
 )
 
-def predict(data: PredictionInput):
+# 모델 예측
+def predict(data: PredictionInput): # data = 사용자 입력 데이터 전달
+                                    # PredictionInput = 사용자 입력 데이터 구조 및 검증
   # 사용자의 입력을 NHANES 컬럼명으로 변환
-  input_df = pd.DataFrame([{
+  input_df = pd.DataFrame([{ # input_df = 사용자가 입력한 DF
     "RIDAGEYR": data.age,    # RIDAGEYR = 나이(연도)
     "RIAGENDR": data.gender, # RIAGENDR = 성별
     "SMQ020": data.ever_smoked, # SMQ020 = 평생 흡연 100개 이상
     "SMQ040": ( # SMQ040 = 현재 흡연빈도
-      data.smoking_frequency
-      if data.smoking_frequency is not None
-      else np.nan
+      data.smoking_frequency # data = 사용자가 입력한 데이터
+                             # smoking_frequency = 사용자 흡연 빈도
+      if data.smoking_frequency is not None # None = 값이 없음
+      else np.nan # .nan = 결측값
     )
   }])
   # 데이터 변수
@@ -227,59 +232,95 @@ def predict(data: PredictionInput):
   # SMQ040   = 현재 흡연빈도        | 매일[1]  가끔[2]  안함[3]
   
   # 기존 전처리 객체 적용
-  X = artifacts["preprocessor"].transform(
-    input_df
+  X = artifacts["preprocessor"].transform( # artifacts = 학습된 모델 및 전처리 객체 보관
+                                           # preprocessor = 저장된 전처리 객체 
+                                           # .transform() = 입력데이터에 적용
+    input_df # input_df = 사용자가 입력한 DF
   )
 
+  # 희소행렬을 --> 일반배열로 반환
   # PyTorch와 ML모델 모두 사용할 수 있게 반환
-  if hasattr(X, "toarray"):
-    X = X.toarray()
+  if hasattr(X, "toarray"): # hasattr() = 지정된 객체가 존재하는지 확인
+                            #             X: 전처리된 입력데이터
+                            #             지정된 객체: toarray
+    # 일반배열로 반환                        
+    X = X.toarray() # .toarray() = 일반배열로 변환하라
+                    # 희소행렬: 전체데이터 중 0이 많은 행렬을 저장하기 위해 0이 아닌 값과 그 위치를 저장하는 행렬
+                    # 밀집배열: 생략되었던 0도 포함하여 전체 배열로 반환
 
-  # 
-  X = np.asarray(X, dtype=np.float32)
+  # NP를 자료형[실수형]으로 변환
+  X = np.asarray(X, dtype=np.float32) # .asarray() = 전달받은 데이터를 NP로 변환
+                                      # X = 기존 전처리 데이터
+                                      # dtype = 타입으로 변경
 
-  #
-  if not np.isfinite(X).all():
-    raise ValueError(
+  # 전처리 데이터 유효성 검증
+  if not np.isfinite(X).all(): # .isfinite() = 각 요소가 유한한 숫자인지 확인
+                               # .all() = 모든 요소가 True인지 확인
+    # 강제 예외 발생
+    raise ValueError( # raise = 강제 반환
+                      # ValueError = 유효하지 않은 값이 있을 때 발생하는 에러
       "전처리 결과에 유효하지 않은 값이 있습니다."
     )
     
   # 로지스틱 회귀 모델 예측
-  lr_prob = artifacts["lr"].predixt_proba(
-    X
-  )[0, 1]
+  lr_prob = artifacts["lr"].predict_proba( # lr_prob   = 로지스틱회귀모델 양성예측 확률
+                                           # artifacts = 모델 및 전처리 객체 보관
+                                           # lr = 로지스틱회귀모델
+                                           # .predixt_proba() = 클래스별 예측 확률 반환
+    X # X = 전처리된 입력데이터
+  )[0, 1] # [0, 1] = 0번 행의 1번 열 선택
 
   # XGBoost 모델 예측
-  xgb_prob = artifacts["xgb"].predixt_proba(
-    X
-  )[0, 1]
+  xgb_prob = artifacts["xgb"].predict_proba( # xgb_prob = XGBoost모델 양성예측 확률
+                                             # artifacts = 모델 및 전처리 객체 보관
+                                             # lr = 로지스틱회귀모델
+                                             # .predixt_proba() = 클래스별 예측 확률 반환
+    X # X = 전처리된 입력데이터
+  )[0, 1] # [0, 1] = 0번 행의 1번 열 선택
 
   # PyTorch 모델 예측
-  with torch.no_grad():
-    #
-    X_tensor = torch.tensor(
-      X,
-      dtype=torch.float32
+  with torch.no_grad(): # with  = 범위 지정
+                        # torch = PyTorch
+                        # no_grad() = 기울기 추적 + 자동 미분 비활성화
+                        #             Dropout 활성화 | Batch Normalization 동작 변경 x
+    
+    # NP 배열을 --> Tensor로 변환
+    X_tensor = torch.tensor( # X_tensor = 변환된 Tensor
+                             # torch = PyTorch
+                             # .tensor() = Tensor
+      X, # X = 전처리된 입력데이터
+      dtype=torch.float32 # dtype = 타입 설정
     )
-    #
-    logits = artifacts["mlp"](X_tensor)
+    
+    # MLP 모델 예측 
+    # 로짓 = 이진분류모델의 시그모이드 함수 적용 전
+    logits = artifacts["mlp"](X_tensor) # logits = MLP모델 활성화함수 적용 전 예측 점수
+                                        # artifacts = 학습된 모델 
+                                        # mlp = 신경망
+                                        # X_tensor = 전처리된 사용자 입력데이터
 
-    #
-    mlp_prob = torch.sigmoid(
-      logits
-    ).item()
+    # MLP 예측 점수를 확률로 변환
+    mlp_prob = torch.sigmoid( # mlp_prob = MLP모델 확률
+                              # torch = PyTorch
+                              # .sigmoid() = 입력값 0~1 값 반환
+      logits # logits  = 모델의 예측 점수
+    ).item() # .item() = Tensor의 숫자값 추출
 
   # 모델별 예측 결과 반환
   return {
+    # 로지스틱회귀모델 예측
     "logistic_regression": format_prediction(
       lr_prob
     ),
+    # XGBoost모델 예측
     "xgboost": format_prediction(
       xgb_prob
     ),
+    # MLP모델 예측 
     "pytorch_mlp": format_prediction(
       mlp_prob
     ),
+    # 면책 및 주의사항 안내
     "disclaimer": (
       "연구 예측 결과 입니다."
     )
