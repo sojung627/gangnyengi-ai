@@ -164,13 +164,40 @@ app.add_middleware( # app = FastAPI 애플리케이션
 # 4. 서버 상태 확인 API ----------------------------------------------------------------------------------------------
 
 # 서버상태 확인
-@app.get("/health")
+@app.get("/health") # @ = 데코레이터
+                    # .get() = GET으로 요청
 def health():
   return{
-    "status": "ok",
-    "model_loaded": len(artifacts) == 4
-  }
+    # 서버작동 상태 == 정상
+    "status": "ok", 
+    # 모델로딩 여부
+    "model_loaded": len(artifacts) == 4 # model_loaded = 모델로딩 여부
+  }                                     # len() = 길이
+                                        # artifacts = 모델 및 전처리 객체 
+                                        # == 4 = 4개면 True | 아니면 False
 
 # 5. 예측결과 변환 ---------------------------------------------------------------------------------------------------
+
+# 모델에서 반환한 확률을 양성 음성 라벨로 변환
+
+# 예측확률
+THRESHOLD = 0.3
+
+# 예측 결과 반환
+# 0.3 이상이면 1 | 0.3 이하면 0
+def format_prediction(probability):
+  # 예측확률을 소수로 변환 
+  probability = float(probability) # probability = 예측확률
+                                   # 변환 전: 0.45
+                                   # 변환 후: 0.4446475675685 
+
+  # 예측결과 반환
+  return { # return{} = dict로 반환
+    "probability": float(probability), # 예측확률 소수점
+    "prediction": int( # prediction = 모델 최종 예측라벨
+      probability >= THRESHOLD # 예측확률 소수점 >= 예측확률
+    ),
+    "threshold": THRESHOLD # threshold = 분류 임계값
+  }
 
 # 6. 핵심 API -------------------------------------------------------------------------------------------------------

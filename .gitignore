@@ -24,6 +24,3 @@ models/
 
 # 실험 결과
 results/
-
-# 환경변수
-# .env
