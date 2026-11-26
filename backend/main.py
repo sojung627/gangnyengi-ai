@@ -201,3 +201,86 @@ def format_prediction(probability):
   }
 
 # 6. 핵심 API -------------------------------------------------------------------------------------------------------
+
+# 모델 예측 API
+@app.post(
+  "/predict",
+  response_model=PredictionResponse
+)
+
+def predict(data: PredictionInput):
+  # 사용자의 입력을 NHANES 컬럼명으로 변환
+  input_df = pd.DataFrame([{
+    "RIDAGEYR": data.age,    # RIDAGEYR = 나이(연도)
+    "RIAGENDR": data.gender, # RIAGENDR = 성별
+    "SMQ020": data.ever_smoked, # SMQ020 = 평생 흡연 100개 이상
+    "SMQ040": ( # SMQ040 = 현재 흡연빈도
+      data.smoking_frequency
+      if data.smoking_frequency is not None
+      else np.nan
+    )
+  }])
+  # 데이터 변수
+  # RIDAGEYR = 나이(연도)          | int
+  # RIAGENDR = 성별                | 남성[1]  여성[2]
+  # SMQ020   = 평생 흡연 100개 이상 | YES[1]   NO[2]
+  # SMQ040   = 현재 흡연빈도        | 매일[1]  가끔[2]  안함[3]
+  
+  # 기존 전처리 객체 적용
+  X = artifacts["preprocessor"].transform(
+    input_df
+  )
+
+  # PyTorch와 ML모델 모두 사용할 수 있게 반환
+  if hasattr(X, "toarray"):
+    X = X.toarray()
+
+  # 
+  X = np.asarray(X, dtype=np.float32)
+
+  #
+  if not np.isfinite(X).all():
+    raise ValueError(
+      "전처리 결과에 유효하지 않은 값이 있습니다."
+    )
+    
+  # 로지스틱 회귀 모델 예측
+  lr_prob = artifacts["lr"].predixt_proba(
+    X
+  )[0, 1]
+
+  # XGBoost 모델 예측
+  xgb_prob = artifacts["xgb"].predixt_proba(
+    X
+  )[0, 1]
+
+  # PyTorch 모델 예측
+  with torch.no_grad():
+    #
+    X_tensor = torch.tensor(
+      X,
+      dtype=torch.float32
+    )
+    #
+    logits = artifacts["mlp"](X_tensor)
+
+    #
+    mlp_prob = torch.sigmoid(
+      logits
+    ).item()
+
+  # 모델별 예측 결과 반환
+  return {
+    "logistic_regression": format_prediction(
+      lr_prob
+    ),
+    "xgboost": format_prediction(
+      xgb_prob
+    ),
+    "pytorch_mlp": format_prediction(
+      mlp_prob
+    ),
+    "disclaimer": (
+      "연구 예측 결과 입니다."
+    )
+  }  
