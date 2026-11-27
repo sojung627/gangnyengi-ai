@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getPredictionError, predictPeriodontal, type PredictionResponse } from "../api/prediction";
-import { PredictionForm } from "../features/prediction/PredictionForm";
-import { PredictionResults } from "../features/prediction/PredictionResults";
+import { AnalysisModal } from "../components/AnalysisModal";
 import { toPredictionInput, type PredictionFormValues } from "../features/prediction/prediction.schema";
 
 export function PredictionPage() {
+  const [modalOpen, setModalOpen] = useState(false);
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,12 +12,23 @@ export function PredictionPage() {
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  const handleReset = useCallback(() => {
+  const clearPrediction = useCallback(() => {
     abortRef.current?.abort();
+    abortRef.current = null;
     setLoading(false);
     setResult(null);
     setError("");
   }, []);
+
+  const closeModal = useCallback(() => {
+    clearPrediction();
+    setModalOpen(false);
+  }, [clearPrediction]);
+
+  const openModal = useCallback(() => {
+    clearPrediction();
+    setModalOpen(true);
+  }, [clearPrediction]);
 
   const handlePredict = useCallback(async (values: PredictionFormValues) => {
     abortRef.current?.abort();
@@ -46,17 +57,22 @@ export function PredictionPage() {
           <h1 id="hero-heading">치주질환 위험도 분석</h1>
           <span className="hero__rule" aria-hidden="true" />
           <p className="hero__intro">내 구강 데이터를 기반으로<br />치주질환의 위험도를 AI가 예측합니다.</p>
-          <a className="hero__cta" href="#analysis">
+          <button type="button" className="hero__cta" onClick={openModal}>
             위험도 분석 시작 <span aria-hidden="true">→</span>
-          </a>
+          </button>
         </div>
       </section>
-
-      <div className="content-width content-layout" id="analysis">
-        <PredictionForm isLoading={loading} onPredict={handlePredict} onReset={handleReset} />
-        {error && <div className="error-banner" role="alert">{error}</div>}
-        {result && <PredictionResults result={result} />}
-      </div>
+      {modalOpen && (
+        <AnalysisModal
+          onClose={closeModal}
+          onPredict={handlePredict}
+          onReset={clearPrediction}
+          onTryAgain={clearPrediction}
+          isLoading={loading}
+          result={result}
+          error={error}
+        />
+      )}
     </main>
   );
 }
