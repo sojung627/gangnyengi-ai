@@ -11,6 +11,9 @@ export const apiClient = axios.create({
 
 export function assertApiConfigured(): void {
   if (!apiBaseUrl) {
-    throw new Error("VITE_API_URL이 설정되지 않았어. frontend/.env.development를 확인해 줘.");
+    // 개발자용 오류 로그
+    console.error("VITE_API_URL이 설정되지 않았습니다.");
+    // 웹에 보일 오류
+    throw new Error("서비스 연결에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
   }
 }

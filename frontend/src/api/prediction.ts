@@ -36,20 +36,52 @@ export async function predictPeriodontal(
 }
 
 export function getPredictionError(error: unknown): string {
-  if (axios.isCancel(error)) return "요청이 취소됐어.";
-  if (error instanceof z.ZodError) return "API 응답 형식이 정의된 모델 계약과 달라. 백엔드 응답을 확인해 줘.";
+  if (axios.isCancel(error)) {
+    console.info("API 요청이 취소되었습니다.");
+    return "검사가 취소 되었습니다.";
+  }
+
+  if (error instanceof z.ZodError) {
+    console.error("API 응답 스키마 불일치:", error.issues);
+    return "검사 결과를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
+  }
+
   if (axios.isAxiosError(error)) {
     const detail: unknown = error.response?.data?.detail;
-    if (typeof detail === "string") return detail;
+
+    if (typeof detail === "string") {
+      console.error("백엔드 오류가 발생했습니다:", detail);
+      return detail;
+    }
+
     if (Array.isArray(detail)) {
       const messages = detail
-        .filter((item): item is { msg: string } => Boolean(item) && typeof item.msg === "string")
+        .filter(
+          (item): item is { msg: string } =>
+            Boolean(item) && typeof item.msg === "string",
+        )
         .map((item) => item.msg);
-      if (messages.length) return messages.join(" / ");
+
+      if (messages.length) {
+        console.error("백엔드 데이터 검증 오류:", messages);
+        return messages.join(" / ");
+      }
     }
-    if (error.code === "ECONNABORTED") return "서버 응답 시간이 초과됐어. 잠시 후 다시 시도해 줘.";
-    if (!error.response) return "API 서버에 연결하지 못했어. 서버 실행 상태와 환경변수를 확인해 줘.";
-    return `요청에 실패했어. (HTTP ${error.response.status})`;
+
+    if (error.code === "ECONNABORTED") {
+      console.error("API 서버 응답 시간이 초과되었습니다.");
+      return "검사 결과를 불러오는 데 시간이 오래 걸리고 있습니다. 잠시 후 다시 시도해 주세요.";
+    }
+
+    if (!error.response) {
+      console.error("API 서버 연결 실패. 서버 실행 상태와 환경변수를 확인해 주세요.");
+      return "서비스에 연결할 수 없습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해 주세요.";
+    }
+
+    console.error("HTTP 요청 실패:", error.response.status);
+    return `검사 진행 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요. (HTTP ${error.response.status})`;
   }
-  return error instanceof Error ? error.message : "알 수 없는 오류가 발생했어.";
+
+  console.error("예상하지 못한 오류가 발생했습니다:", error);
+  return error instanceof Error ? error.message : "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
 }
