@@ -24,7 +24,7 @@ export const predictionFormSchema = z.object({
 
   smokingFrequency: z.string(),
 }).superRefine((data, ctx) => {
-  if (data.everSmoked === "1" && !["1", "2", "3"].includes(data.smokingFrequency)) {
+  if (!["1", "2", "3"].includes(data.smokingFrequency)) {
     console.warn("현재 흡연 상태가 선택되지 않았거나 유효하지 않습니다.");
 
     ctx.addIssue({
@@ -64,7 +64,7 @@ export function toPredictionInput(data: PredictionFormValues): PredictionInput {
   }
 
   // 현재 흡연 상태 유효성 검증
-  if (data.everSmoked === "1" && !["1", "2", "3"].includes(data.smokingFrequency)) {
+  if (!["1", "2", "3"].includes(data.smokingFrequency)) {
     console.error("현재 흡연 상태 데이터 변환 실패: 입력값이 누락되었거나 유효하지 않습니다.");
     errors.push("현재 흡연 상태를 선택해 주세요.");
   }
@@ -79,8 +79,6 @@ export function toPredictionInput(data: PredictionFormValues): PredictionInput {
     age: Number(data.age),
     gender: Number(data.gender) as 1 | 2,
     ever_smoked: Number(data.everSmoked) as 1 | 2,
-    smoking_frequency: data.everSmoked === "1"
-      ? Number(data.smokingFrequency) as 1 | 2 | 3
-      : null,
+    smoking_frequency: Number(data.smokingFrequency) as 1 | 2 | 3,
   };
 }

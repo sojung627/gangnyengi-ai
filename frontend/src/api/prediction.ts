@@ -51,7 +51,7 @@ export function getPredictionError(error: unknown): string {
 
     if (typeof detail === "string") {
       console.error("백엔드 오류가 발생했습니다:", detail);
-      return detail;
+      return "검사 진행 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.";
     }
 
     if (Array.isArray(detail)) {
@@ -64,7 +64,7 @@ export function getPredictionError(error: unknown): string {
 
       if (messages.length) {
         console.error("백엔드 데이터 검증 오류:", messages);
-        return messages.join(" / ");
+        return "입력하신 정보를 다시 확인해 주세요.";
       }
     }
 
@@ -74,7 +74,9 @@ export function getPredictionError(error: unknown): string {
     }
 
     if (!error.response) {
-      console.error("API 서버 연결 실패. 서버 실행 상태와 환경변수를 확인해 주세요.");
+      console.error(
+        "API 서버 연결 실패. 서버 실행 상태와 환경변수를 확인해 주세요.",
+      );
       return "서비스에 연결할 수 없습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해 주세요.";
     }
 
@@ -83,5 +85,5 @@ export function getPredictionError(error: unknown): string {
   }
 
   console.error("예상하지 못한 오류가 발생했습니다:", error);
-  return error instanceof Error ? error.message : "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+  return "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
 }

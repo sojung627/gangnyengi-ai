@@ -54,7 +54,7 @@ class PredictionInput(BaseModel): # PredictionInput = 예측 입력데이터 구
     # 흡연경험이 없다면
     if self.ever_smoked == 2:
       # 흡연 빈도를 입력하지 않았다면
-      if self.smoking_frequency is not None:
+      if self.smoking_frequency is None:
         # 흡연경험이 없고 흡연빈도 입력 안했다면 강제 에러
         raise ValueError( # raise = 강제 발생
                           # ValueError = 이상한 값에 대한 에러

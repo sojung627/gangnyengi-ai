@@ -121,7 +121,6 @@ export function PredictionForm({
             </p>
           )}
         </div>
-        {everSmoked === "1" && (
           <div className="analysis-field analysis-field--wide">
             <label htmlFor="smokingFrequency">
               <i className="fa-solid fa-smoking" aria-hidden="true" /> 현재 흡연
@@ -150,7 +149,6 @@ export function PredictionForm({
               </p>
             )}
           </div>
-        )}
         
       </div>
       <p className="analysis-form__disclosure">
