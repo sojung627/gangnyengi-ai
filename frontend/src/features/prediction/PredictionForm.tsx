@@ -56,7 +56,6 @@ export function PredictionForm({
       <div className="analysis-form__grid">
         <div className="analysis-field">
           <label htmlFor="age">
-            <i className="fa-regular fa-calendar-days" aria-hidden="true" />{" "}
             나이
           </label>
           <input
@@ -79,7 +78,7 @@ export function PredictionForm({
         </div>
         <div className="analysis-field">
           <label htmlFor="gender">
-            <i className="fa-solid fa-mars-and-venus" aria-hidden="true" /> 성별
+            성별
           </label>
           <select
             id="gender"
@@ -99,7 +98,7 @@ export function PredictionForm({
         </div>
         <div className="analysis-field analysis-field--wide">
           <label htmlFor="everSmoked">
-            <i className="fa-solid fa-smoking" aria-hidden="true" /> 흡연 여부
+            흡연 여부
           </label>
           <select
             id="everSmoked"
@@ -128,7 +127,7 @@ export function PredictionForm({
         </div>
         <div className="analysis-field analysis-field--wide">
           <label htmlFor="smokingFrequency">
-            <i className="fa-solid fa-smoking" aria-hidden="true" /> 현재 흡연
+            현재 흡연
             상태
           </label>
           <select
