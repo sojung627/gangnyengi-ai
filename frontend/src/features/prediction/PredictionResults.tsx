@@ -67,7 +67,7 @@ export function PredictionResults({ result }: { result: PredictionResponse }) {
         </div>
       </div>
       <p className="panel__description">
-        확률은 AI가 추측한 것일 뿐 공식적인 진단이 아닙니다.
+        개인의 건강정보는 저장되지 않습니다.
       </p>
       <div className="model-grid">
         <ModelCard
