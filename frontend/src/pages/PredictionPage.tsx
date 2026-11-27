@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Activity, Database, ShieldCheck } from "lucide-react";
 import { getPredictionError, predictPeriodontal, type PredictionResponse } from "../api/prediction";
 import { PredictionForm } from "../features/prediction/PredictionForm";
 import { PredictionResults } from "../features/prediction/PredictionResults";
@@ -43,14 +42,13 @@ export function PredictionPage() {
   return (
     <main id="top">
       <section className="hero" aria-labelledby="hero-heading">
-        <div className="content-width hero__inner">
-          <span className="hero__eyebrow"><Activity size={15} aria-hidden="true" /> DATA-DRIVEN PERIODONTAL RESEARCH</span>
-          <h1 id="hero-heading">데이터로 살펴보는<br /><span>치주 건강 분류</span></h1>
-          <p className="hero__intro">NHANES 2013–2014 데이터를 바탕으로 학습한 머신러닝·딥러닝 모델의 예측 결과를 한곳에서 비교해 보세요.</p>
-          <div className="hero__facts">
-            <span><Database size={17} aria-hidden="true" /> NHANES 2013–2014</span>
-            <span><ShieldCheck size={17} aria-hidden="true" /> 연구·교육 목적</span>
-          </div>
+        <div className="hero__inner">
+          <h1 id="hero-heading">치주질환 위험도 분석</h1>
+          <span className="hero__rule" aria-hidden="true" />
+          <p className="hero__intro">내 구강 데이터를 기반으로<br />치주질환의 위험도를 AI가 예측합니다.</p>
+          <a className="hero__cta" href="#analysis">
+            위험도 분석 시작 <span aria-hidden="true">→</span>
+          </a>
         </div>
       </section>
 
