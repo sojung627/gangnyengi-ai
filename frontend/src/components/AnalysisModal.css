@@ -234,11 +234,9 @@
 .analysis-modal .result-panel .eyebrow {
   color: #ffe5d9;
 }
-.analysis-modal .result-panel .panel__heading-icon {
-  color: #fff2eb;
-}
 .analysis-modal .model-card {
-  background: rgba(255, 250, 246, 0.82);
+  background: rgba(255, 250, 246, 0.20); 
+  border: None;
 }
 .analysis-modal .model-card h3 {
   color: #3b3030;

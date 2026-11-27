@@ -345,10 +345,10 @@
   justify-content: space-between;
   margin-top: 16px;
   font-size: 11px;
-  color: #728b8d;
+  color: #E7D9CB;
 }
 .model-card__foot strong {
-  color: #294a4c;
+  color: #F5EDE3;
 }
 .notice {
   display: flex;
@@ -626,10 +626,10 @@
   box-shadow: 0 0 0 3px rgba(173, 130, 124, 0.15);
 }
 .model-card__value {
-  color: #8e6960;
+  color: #F5EDE3;
 }
 .meter__fill {
-  background: #a88077;
+  background: #D5AC99;
 }
 .site-footer {
   background: rgba(25, 17, 17, 0.21);

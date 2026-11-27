@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getPredictionError, predictPeriodontal, type PredictionResponse } from "../api/prediction";
+import {
+  getPredictionError,
+  predictPeriodontal,
+  type PredictionResponse,
+} from "../api/prediction";
 import { AnalysisModal } from "../components/AnalysisModal";
-import { toPredictionInput, type PredictionFormValues } from "../features/prediction/prediction.schema";
+import {
+  toPredictionInput,
+  type PredictionFormValues,
+} from "../features/prediction/prediction.schema";
 
 export function PredictionPage() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -38,7 +45,10 @@ export function PredictionPage() {
     setError("");
     setResult(null);
     try {
-      const data = await predictPeriodontal(toPredictionInput(values), controller.signal);
+      const data = await predictPeriodontal(
+        toPredictionInput(values),
+        controller.signal,
+      );
       if (!controller.signal.aborted) setResult(data);
     } catch (err: unknown) {
       if (!controller.signal.aborted) setError(getPredictionError(err));
@@ -56,9 +66,13 @@ export function PredictionPage() {
         <div className="hero__inner">
           <h1 id="hero-heading">치주질환 위험도</h1>
           <span className="hero__rule" aria-hidden="true" />
-          <p className="hero__intro">입력한 정보를 바탕으로<br />치주질환의 위험도를 AI가 예측합니다.</p>
+          <p className="hero__intro">
+            입력한 정보를 바탕으로
+            <br />
+            치주질환의 위험도를 AI가 예측합니다.
+          </p>
           <button type="button" className="hero__cta" onClick={openModal}>
-            시작하기<span aria-hidden="true">→</span>
+            시작하기<span aria-hidden="true"></span>
           </button>
         </div>
       </section>

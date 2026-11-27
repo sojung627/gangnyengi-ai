@@ -34,7 +34,12 @@ export function PredictionForm({
   const everSmoked = watch("everSmoked");
 
   useEffect(() => {
-    if (everSmoked !== "1") setValue("smokingFrequency", "");
+    // 100개비 이상 흡연 경험이 없다면 현재 흡연하지 않음으로 설정
+    if (everSmoked === "2") {
+      setValue("smokingFrequency", "3");
+    } else {
+      setValue("smokingFrequency", "");
+    }
   }, [everSmoked, setValue]);
 
   function clearForm() {
@@ -74,7 +79,7 @@ export function PredictionForm({
         </div>
         <div className="analysis-field">
           <label htmlFor="gender">
-            <i className="fa-solid fa-venus-mars" aria-hidden="true" /> 성별
+            <i className="fa-solid fa-mars-and-venus" aria-hidden="true" /> 성별
           </label>
           <select
             id="gender"
@@ -121,35 +126,38 @@ export function PredictionForm({
             </p>
           )}
         </div>
-          <div className="analysis-field analysis-field--wide">
-            <label htmlFor="smokingFrequency">
-              <i className="fa-solid fa-smoking" aria-hidden="true" /> 현재 흡연
-              상태
-            </label>
-            <select
-              id="smokingFrequency"
-              aria-invalid={Boolean(errors.smokingFrequency)}
-              aria-describedby={
-                errors.smokingFrequency ? "smokingFrequency-error" : undefined
-              }
-              {...register("smokingFrequency")}
-            >
-              <option value="">선택해 주세요</option>
-              <option value="1">매일 흡연</option>
-              <option value="2">가끔 흡연</option>
-              <option value="3">현재 흡연하지 않음</option>
-            </select>
-            {errors.smokingFrequency && (
-              <p
-                id="smokingFrequency-error"
-                className="analysis-field__error"
-                role="alert"
-              >
-                {errors.smokingFrequency.message}
-              </p>
+        <div className="analysis-field analysis-field--wide">
+          <label htmlFor="smokingFrequency">
+            <i className="fa-solid fa-smoking" aria-hidden="true" /> 현재 흡연
+            상태
+          </label>
+          <select
+            id="smokingFrequency"
+            aria-invalid={Boolean(errors.smokingFrequency)}
+            aria-describedby={
+              errors.smokingFrequency ? "smokingFrequency-error" : undefined
+            }
+            {...register("smokingFrequency")}
+          >
+            {everSmoked !== "2" && (
+              <>
+                <option value="">선택해 주세요</option>
+                <option value="1">매일 흡연</option>
+                <option value="2">가끔 흡연</option>
+              </>
             )}
-          </div>
-        
+            <option value="3">현재 흡연하지 않음</option>
+          </select>
+          {errors.smokingFrequency && (
+            <p
+              id="smokingFrequency-error"
+              className="analysis-field__error"
+              role="alert"
+            >
+              {errors.smokingFrequency.message}
+            </p>
+          )}
+        </div>
       </div>
       <p className="analysis-form__disclosure">
         현재 모델은 나이 성별 흡연 정보로 예측합니다.
@@ -161,7 +169,6 @@ export function PredictionForm({
         aria-busy={isLoading}
       >
         <span>{isLoading ? "분석 중..." : "분석하기"}</span>
-        <i className="fa-solid fa-arrow-right" aria-hidden="true" />
       </button>
       <button
         type="button"

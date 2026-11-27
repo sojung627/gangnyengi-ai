@@ -65,22 +65,17 @@ export function PredictionResults({ result }: { result: PredictionResponse }) {
           <p className="eyebrow">RESULTS</p>
           <h2 id="results-heading">모델별 예측 결과</h2>
         </div>
-        <BarChart3
-          size={23}
-          className="panel__heading-icon"
-          aria-hidden="true"
-        />
       </div>
       <p className="panel__description">
         확률은 AI가 추측한 것일 뿐 공식적인 진단이 아닙니다.
       </p>
       <div className="model-grid">
         <ModelCard
-          title="Logistic Regression"
+          title= "LR"
           model={result.logistic_regression}
         />
         <ModelCard title="XGBoost" model={result.xgboost} />
-        <ModelCard title="PyTorch MLP" model={result.pytorch_mlp} />
+        <ModelCard title="MLP" model={result.pytorch_mlp} />
       </div>
       <div className="notice" role="note">
         <AlertTriangle size={18} aria-hidden="true" />
