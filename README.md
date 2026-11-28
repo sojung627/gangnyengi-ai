@@ -187,10 +187,9 @@ flowchart LR
 
 ![모델 성능 비교](docs/images/comparison.png)
 
-- Logistic Regression이 Recall, F1-score, ROC-AUC, AP에서 가장 높은 결과를 기록했습니다.
-- MLP는 Accuracy와 Precision에서 가장 높은 결과를 보였지만 차이는 작습니다.
-- 임계값을 낮추면서 양성 탐지 비율이 증가하는 대신 위양성 부담도 증가했습니다. 테스트 음성 비율(351/543, 약 64.64%)보다 세 모델의 Accuracy가 낮다는 점도 함께 고려해야 합니다.
-- 복잡한 모델이 항상 단순한 모델보다 우수하지 않으며 모델 점수의 임상적 활용 가능성을 입증한 결과는 아닙니다.
+- Logistic Regression이 Recall, F1-score, ROC-AUC, AP에서 가장 높은 결과를 기록
+- MLP는 Accuracy와 Precision에서 가장 높은 결과를 보였지만 차이는 작음
+- 임계값을 낮추면서 양성 탐지 비율이 증가하였으나 위양성 부담도 증가
 
 ### ROC 및 Precision-Recall 곡선
 
