@@ -1,50 +1,75 @@
-import { useEffect, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react"; // useEffect = 컴포넌트 렌더링 후 작업 실행하는 React Hook
+                                   // react = React 라이브러리
+import { zodResolver } from "@hookform/resolvers/zod"; // zodResolver = Zod 유효성검증스키마를 React Hook Form과 연결
+                                                       // @hookform/resolvers/zod = zodResolver의 라이브러리 모듈
+import { useForm } from "react-hook-form"; // useForm = 입력폼 데이터 + 유효성 검증 상태 관리하는 React Hook
+// 입력폼 관련 데이터 및 자료형 가져오기
 import {
-  emptyPredictionForm,
-  predictionFormSchema,
-  type PredictionFormValues,
-} from "./prediction.schema";
+  emptyPredictionForm,  // emptyPredictionForm  = 입력폼 초기값을 저장한 객체
+  predictionFormSchema, // predictionFormSchema = 입력폼 유효성 검증 스키마
+  type PredictionFormValues, // type = tsx의 자료형을 가져와라
+                             // PredictionFormValues = 입력폼데이터의 자료형
+} from "./prediction.schema"; // prediction.schema.ts 불러와라
 
-interface PredictionFormProps {
-  isLoading: boolean;
-  onPredict: (values: PredictionFormValues) => Promise<void>;
-  onReset: () => void;
-}
+// 컴포넌트 Props 인터페이스 정의 
+interface PredictionFormProps { // interface = 인터페이스
+                                // PredictionFormProps = 컴포넌트가 전달받을 Props의 자료형
+  isLoading: boolean; // isLoading = 현재예측작업의 진행 여부
+  onPredict: (values: PredictionFormValues) => Promise<void>; // onPredict = 치주질환 예측 실행함수를 전달 받아라
+                                                              // values = 입력폼 데이터 전달받는 변수
+                                                              // PredictionFormValues = 입력폼 데이터 자료형
+                                                              // Promise = 비동기 작업 완료 or 실패 
+                                                              // <void>  = 비동기 성공해도 반환값 없음
+  onReset: () => void; // onReset = 초기화 함수를 전달받는 속성
+}                      // () = 전달받을 매개변수 x
+                       // void  = 비동기 성공해도 반환값 없음
 
-export function PredictionForm({
-  isLoading,
-  onPredict,
-  onReset,
-}: PredictionFormProps) {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    reset,
-    formState: { errors },
-  } = useForm<PredictionFormValues>({
-    resolver: zodResolver(predictionFormSchema),
-    defaultValues: emptyPredictionForm,
-    mode: "onSubmit",
-  });
-  // 시안에 포함된 참고 수치: 현재 저장된 모델의 예측 입력에는 포함되지 않는다.
-  const everSmoked = watch("everSmoked");
-
-  useEffect(() => {
-    // 100개비 이상 흡연 경험이 없다면 현재 흡연하지 않음으로 설정
-    if (everSmoked === "2") {
-      setValue("smokingFrequency", "3");
+// PredictionForm 컴포넌트 선언                       
+export function PredictionForm({ // export   = 외부에서 받아오라
+                                 // function = 함수
+  isLoading, // isLoading = 분석 작업의 진행 여부
+  onPredict, // onPredict = 치주질환 예측 실행 함수
+  onReset,   // onReset = 초기화 함수
+}: PredictionFormProps) { // PredictionFormProps = 전달받는 Props의 자료형
+  const { // const = 상수
+    register,     // register = HTML 입력요소를 React Hook에 등록시킴
+    handleSubmit, // handleSubmit = 입력폼 제출 및 유효성 검증 처리
+    watch,    // watch    = 입력폼 특정 입력값을 구독 및 확인
+    setValue, // setValue = 특정 입력필드의 값을 변경 
+    reset,    // reset = 입력폼 + 입력값 + 폼 상태를 초기화
+    formState: { errors }, // formState  = 입력폼 상태 정보 저장
+                           // { errors } = 입력폼 에러 정보 저장
+  } = useForm<PredictionFormValues>({ // useForm = 입력폼 데이터 및 상태 관리하는 React Hook
+                                      // <PredictionFormValues> = 입력폼에 관리할 데이터
+    resolver: zodResolver(predictionFormSchema), // resolver = 입력폼에 적용할 외부유효성검증 기능 지정
+                                                 // zodResolver = zod를 React Hook Form과 연결
+                                                 // predictionFormSchema = 입력폼 유효성 검증 스키마
+    defaultValues: emptyPredictionForm, // defaultValues = 입력폼 초기값 지정
+                                        // emptyPredictionForm = 입력폼 초기값을 저장
+    mode: "onSubmit", // mode = 입력폼의 최초 유효성검증 실행 시점을 지정
+  });                 // onSubmit = 입력폼 제출 시 유효성검증 실행 
+  
+  // 흡연 경험 입력값 변경시 감지  
+  const everSmoked = watch("everSmoked"); // const = 상수
+                                          // everSmoked = 현재 흡연 경험 입력값 저장
+                                          // watch() = 입력폼의 특정입력값을 구독 + 확인
+                                          // "everSmoked" = 구독할 입력폼 필드명
+  // 흡연경험에 따른 입력값 자동 변경                                        
+  useEffect(() => { // useEffect() = 컴포넌트 렌더링 이후 특정 작업 실행하는 React Hook
+                    // () = 매개변수가 x 
+    // 100개비 이상 흡연 x == 흡연 x 
+    if (everSmoked === "2") { 
+      setValue("smokingFrequency", "3"); // setValue() = 입력폼의 특정 필드값을 변경
     } else {
-      setValue("smokingFrequency", "");
+      setValue("smokingFrequency", ""); // "" = 초기화
     }
-  }, [everSmoked, setValue]);
+  }, [everSmoked, setValue]); // 의존성 배열
 
-  function clearForm() {
-    reset(emptyPredictionForm);
-    onReset();
+  // 입력폼 초기화
+  function clearForm() { // function = 함수 
+    reset(emptyPredictionForm); // reset = 입력값 초기화
+                                // emptyPredictionForm = 입력폼 초기값 
+    onReset(); // onReset() = 부모 컴포넌트에게 받은것들 초기화
   }
 
   return (

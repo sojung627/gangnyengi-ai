@@ -1,4 +1,4 @@
-import { AlertTriangle, BarChart3, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import type { ModelPrediction, PredictionResponse } from "../../api/prediction";
 
 function ModelCard({
