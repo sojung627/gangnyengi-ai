@@ -76,7 +76,8 @@ GangNaengI_AI/
 | 11/25 | src/evalution.py   results/ |
 | 11/26 | backend/   frontend/        |
 | 11/27 | backend/   frontend/        |
-| 11/28 | tests/   README.md          |
+| 11/28 | backend/   frontend/        |
+| 11/29 | tests/   README.md          |
 
 ### 꼭 지킬 설계 원칙
 
@@ -123,9 +124,12 @@ GangNaengI_AI/
 ✅ 디자인 수정
 ✅ 편의성 개선
 
-**11/28 - 포트폴리오 완성**
-ㅁ Docker 실행 환경 및 테스트
+**11/28 - 오류 개선 및 수정**
+✅ 오류개선 및 수정
 ㅁ README·아키텍처·성능표 작성
+
+**11/29 - 포트폴리오 완성**
+ㅁ Docker 실행 환경 및 테스트
 ㅁ GitHub 업로드 및 데모 확인
 
 ---
