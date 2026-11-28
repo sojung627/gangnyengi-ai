@@ -204,7 +204,7 @@ Confusion Matrix로 TP/TN/FP/FN을 확인한 뒤 ROC-AUC 및 AP로 점수의 분
 
 ![XGBoost SHAP 특성 중요도](docs/images/shap.png)
 
-XGBoost의 TreeExplainer와 평균 절대 SHAP 값을 활용해 전처리된 특성별 예측 기여도를 비교했습니다. 개발일지에서는 성별 관련 특성이 높은 중요도를 나타냈습니다. 이는 해당 모델이 예측에 활용한 특성을 보여 주는 것이며 치주질환의 인과관계나 실제 위험요인 순위를 증명하지 않습니다.
+XGBoost의 TreeExplainer와 평균 절대 SHAP 값으로 전처리된 예측 기여도를 비교  
 
 ## 9. API 및 서비스 화면
 
