@@ -199,8 +199,7 @@ flowchart LR
 | ------------------------------- | --------------------------------- | --------------------------------- |
 | ![LR PR](docs/images/pr-lr.png) | ![XGB PR](docs/images/pr-xgb.png) | ![MLP PR](docs/images/pr-mlp.png) |
 
-Confusion Matrix로 TP/TN/FP/FN을 확인한 뒤 ROC-AUC 및 AP로 점수의 분류 성능을 비교했습니다.
-
+Confusion Matrix로 TP/TN/FP/FN을 확인한 뒤 ROC-AUC 및 AP로 점수의 분류 성능을 비교
 ### SHAP 분석
 
 ![XGBoost SHAP 특성 중요도](docs/images/shap.png)
