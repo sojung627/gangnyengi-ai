@@ -21,7 +21,7 @@ export const apiClient = axios.create({ // export    = 다른 파일도 사용�
 });                                                // Content-Type = HTTP메시지 본문 데이터 형식
                                                    // application/json = 데이터형식은 JSON이라는 선언
 
-// API 설정 체크                                                   
+// API설정 유무 체크                                                   
 export function assertApiConfigured(): void { // export   = 다른 파일도 사용할 수 있게 하라
                                               // function = 함수
                                               // void = 반환값 없음
