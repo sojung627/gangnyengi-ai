@@ -1,5 +1,3 @@
-import { useEffect } from "react"; // useEffect = 컴포넌트 렌더링 후 작업 실행하는 React Hook
-                                   // react = React 라이브러리
 import { zodResolver } from "@hookform/resolvers/zod"; // zodResolver = Zod 유효성검증스키마를 React Hook Form과 연결
                                                        // @hookform/resolvers/zod = zodResolver의 라이브러리 모듈
 import { useForm } from "react-hook-form"; // useForm = 입력폼 데이터 + 유효성 검증 상태 관리하는 React Hook
@@ -34,8 +32,6 @@ export function PredictionForm({ // export   = 외부에서 받아오라
   const { // const = 상수
     register,     // register = HTML 입력요소를 React Hook에 등록시킴
     handleSubmit, // handleSubmit = 입력폼 제출 및 유효성 검증 처리
-    watch,    // watch    = 입력폼 특정 입력값을 구독 및 확인
-    setValue, // setValue = 특정 입력필드의 값을 변경 
     reset,    // reset = 입력폼 + 입력값 + 폼 상태를 초기화
     formState: { errors }, // formState  = 입력폼 상태 정보 저장
                            // { errors } = 입력폼 에러 정보 저장
@@ -49,21 +45,21 @@ export function PredictionForm({ // export   = 외부에서 받아오라
     mode: "onSubmit", // mode = 입력폼의 최초 유효성검증 실행 시점을 지정
   });                 // onSubmit = 입력폼 제출 시 유효성검증 실행 
   
-  // 흡연 경험 입력값 변경시 감지  
-  const everSmoked = watch("everSmoked"); // const = 상수
-                                          // everSmoked = 현재 흡연 경험 입력값 저장
-                                          // watch() = 입력폼의 특정입력값을 구독 + 확인
-                                          // "everSmoked" = 구독할 입력폼 필드명
-  // 흡연경험에 따른 입력값 자동 변경                                        
-  useEffect(() => { // useEffect() = 컴포넌트 렌더링 이후 특정 작업 실행하는 React Hook
-                    // () = 매개변수가 x 
-    // 100개비 이상 흡연 x == 흡연 x 
-    if (everSmoked === "2") { 
-      setValue("smokingFrequency", "3"); // setValue() = 입력폼의 특정 필드값을 변경
-    } else {
-      setValue("smokingFrequency", ""); // "" = 초기화
-    }
-  }, [everSmoked, setValue]); // 의존성 배열
+  // // 흡연 경험 입력값 변경시 감지  
+  // const everSmoked = watch("everSmoked"); // const = 상수
+  //                                         // everSmoked = 현재 흡연 경험 입력값 저장
+  //                                         // watch() = 입력폼의 특정입력값을 구독 + 확인
+  //                                         // "everSmoked" = 구독할 입력폼 필드명
+  // // 흡연경험에 따른 입력값 자동 변경                                        
+  // useEffect(() => { // useEffect() = 컴포넌트 렌더링 이후 특정 작업 실행하는 React Hook
+  //                   // () = 매개변수가 x 
+  //   // 100개비 이상 흡연 x == 흡연 x 
+  //   if (everSmoked === "2") { 
+  //     setValue("smokingFrequency", "3"); // setValue() = 입력폼의 특정 필드값을 변경
+  //   } else {
+  //     setValue("smokingFrequency", ""); // "" = 초기화
+  //   }
+  // }, [everSmoked, setValue]); // 의존성 배열
 
   // 입력폼 초기화
   function clearForm() { // function = 함수 
@@ -163,13 +159,13 @@ export function PredictionForm({ // export   = 외부에서 받아오라
             }
             {...register("smokingFrequency")}
           >
-            {everSmoked !== "2" && (
+            
               <>
                 <option value="">선택해 주세요</option>
                 <option value="1">매일 흡연</option>
                 <option value="2">가끔 흡연</option>
               </>
-            )}
+            
             <option value="3">현재 흡연하지 않음</option>
           </select>
           {errors.smokingFrequency && (

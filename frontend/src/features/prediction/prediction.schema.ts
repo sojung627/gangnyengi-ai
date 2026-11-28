@@ -127,6 +127,6 @@ export function toPredictionInput(data: PredictionFormValues): PredictionInput {
                            // data   = 입력데이터
     gender: Number(data.gender) as 1 | 2, // as = 타입 단원 키워드
     ever_smoked: Number(data.everSmoked) as 1 | 2,
-    smoking_frequency: Number(data.smokingFrequency) as 1 | 2 | 3,
+    smoking_frequency: data.everSmoked === "2" ? null : (Number(data.smokingFrequency) as 1 | 2 | 3),
   };
 }

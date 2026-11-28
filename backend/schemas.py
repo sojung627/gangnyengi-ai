@@ -39,29 +39,18 @@ class PredictionInput(BaseModel): # PredictionInput = 예측 입력데이터 구
                                  # mode  = 검증실행 시점 설정
                                  # after = 개별 검증 끝난 뒤 실행하라
                                  #         --> 모델 단위 유효성 검증을
-  # 흡연 관련 데이터 검증                               
-  def check_smoking(self): # self = 현재 생성된 클래스 인스턴스 자신
-    # 흡연경험이 있다면
-    if self.ever_smoked == 1:
-      # 흡연 빈도를 입력하지 않았다면
-      if self.smoking_frequency is None:
-        # 흡연경험이 있고 흡연빈도 입력 안했다면 강제 에러
-        raise ValueError( # raise = 강제 발생
-                          # ValueError = 이상한 값에 대한 에러
-          "흡연경험이 있다면 흡연빈도를 선택하세요."
-        )
-    
-    # 흡연경험이 없다면
+  # 흡연경험 및 현재흡연빈도 검증
+  @model_validator(mode="after")
+  def check_smoking(self):
+    # 현재 흡연 상태 미입력 시 오류 발생
+    if self.smoking_frequency is None:
+      raise ValueError("현재 흡연 상태를 선택해 주세요.")
+
+    # NHANES 학습 데이터 기준으로 결측값 처리
     if self.ever_smoked == 2:
-      # 흡연 빈도를 입력하지 않았다면
-      if self.smoking_frequency is None:
-        # 흡연경험이 없고 흡연빈도 입력 안했다면 강제 에러
-        raise ValueError( # raise = 강제 발생
-                          # ValueError = 이상한 값에 대한 에러
-          "흡연경험이 없다면 흡연빈도를 입력하지 마세요."
-        )  
-    return self # PredictionInput 반환
-                # 사용자가 직접 입력 --> 나이, 성별, 흡연경험 유무, 현재흡연 빈도
+      self.smoking_frequency = None
+
+    return self
 
 # 모델 1개당 예측 결과
 class ModelPrediction(BaseModel): # ModelPrediction = 모델 1개당 예측 결과
