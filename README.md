@@ -199,7 +199,7 @@ flowchart LR
 | ------------------------------- | --------------------------------- | --------------------------------- |
 | ![LR PR](docs/images/pr-lr.png) | ![XGB PR](docs/images/pr-xgb.png) | ![MLP PR](docs/images/pr-mlp.png) |
 
-Confusion Matrix를 통해 TP/TN/FP/FN을 확인하고 ROC-AUC 및 AP로 점수의 분류 성능을 비교했습니다. 특히 Recall 중심 임계값 설정이 실제 오분류에 미치는 영향을 분석했습니다.
+Confusion Matrix로 TP/TN/FP/FN을 확인한 뒤 ROC-AUC 및 AP로 점수의 분류 성능을 비교했습니다.
 
 ### SHAP 분석
 
