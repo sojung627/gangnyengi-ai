@@ -211,9 +211,9 @@ XGBoost의 TreeExplainer와 평균 절대 SHAP 값으로 전처리된 예측 기
 | Method | Endpoint     | 역할                                         |
 | ------ | ------------ | -------------------------------------------- |
 | GET    | `/health`  | 서버 및 모델 로딩 상태 확인                  |
-| POST   | `/predict` | 네 입력 변수에 대한 세 모델의 예측 결과 반환 |
+| POST   | `/predict` | 입력 변수에 대한 세 모델의 예측 결과 반환 |
 
-요청 형식 예시(가상 입력):
+요청 형식 예시:
 
 ```json
 {
@@ -224,7 +224,7 @@ XGBoost의 TreeExplainer와 평균 절대 SHAP 값으로 전처리된 예측 기
 }
 ```
 
-응답은 `logistic_regression`, `xgboost`, `pytorch_mlp` 각 객체의 `probability`, `prediction`, `threshold` 및 `disclaimer`를 포함합니다.
+응답은 `logistic_regression`, `xgboost`, `pytorch_mlp` 각 객체의 `probability`, `prediction`, `threshold` 및 `disclaimer`를 포함
 
 ### 입력 화면
 
