@@ -23,22 +23,14 @@ class PredictionInput(BaseModel): # PredictionInput = 예측 입력데이터 구
   ever_smoked: Literal[1, 2] # Literal = 입력 가능한 값 설정
                              # [1, 2]  = 허용되는 값
   # 현재흡연 빈도 - 매일[1] | 가끔[2] | 안함[3]
-  smoking_frequency: Literal[1, 2, 3] | None = None # Literal    = 입력 가능한 값 설정
-                                                    # [1, 2, 3]  = 허용되는 값 
-                                                    # | = 여러타입 중 하나 사용
-                                                    # None=None  = None값도 허용 + 기본값도 None값
+  smoking_frequency: Literal[1, 2, 3] # Literal    = 입력 가능한 값 설정
+                                      # [1, 2, 3]  = 허용되는 값 
   # 데이터 변수
   # RIDAGEYR = 연령                | int
   # RIAGENDR = 성별                | 남성[1]  여성[2]
   # SMQ020   = 평생 흡연 100개 이상 | YES[1]   NO[2]
   # SMQ040   = 현재 흡연빈도        | 매일[1]  가끔[2]  안함[3]
 
-  # 흡연경험 및 현재흡연빈도 검증
-  @model_validator(mode="after") # @ = 데코레이터 - 추가기능 적용
-                                 # @model_validator() = 모델 단위 유효성 검증 설정
-                                 # mode  = 검증실행 시점 설정
-                                 # after = 개별 검증 끝난 뒤 실행하라
-                                 #         --> 모델 단위 유효성 검증을
   # 흡연경험 및 현재흡연빈도 검증
   @model_validator(mode="after")
   def check_smoking(self):

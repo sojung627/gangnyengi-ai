@@ -227,7 +227,7 @@ def predict(data: PredictionInput): # data = 사용자 입력 데이터 전달
     "SMQ040": ( # SMQ040 = 현재 흡연빈도
       data.smoking_frequency # data = 사용자가 입력한 데이터
                              # smoking_frequency = 사용자 흡연 빈도
-      if data.smoking_frequency is not None # None = 값이 없음
+      if data.ever_smoked == 1 
       else np.nan # .nan = 결측값
     )
   }])

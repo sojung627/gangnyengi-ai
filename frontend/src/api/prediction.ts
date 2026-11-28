@@ -16,7 +16,7 @@ export interface PredictionInput { // backend/schemas.py의 PredictionInput/Pred
   age: number;   // 나이 = 숫자(정수 or 실수)
   gender: 1 | 2; // 성별 = 1 or 2
   ever_smoked: 1 | 2; // 흡연경험 = 1 or 2
-  smoking_frequency: 1 | 2 | 3 | null; // 흡연빈도 = 1 or 2 or 3 or Null
+  smoking_frequency: 1 | 2 | 3; // 흡연빈도 = 1 or 2 or 3
 }
 
 // 예측결과 조건 설정
