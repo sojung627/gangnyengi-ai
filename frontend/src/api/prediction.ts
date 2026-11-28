@@ -192,25 +192,40 @@ export function getPredictionError(error: unknown): string { // export   = 외�
 
       // 오류메시지 개수 확인                            
       if (messages.length) { // .length = 길이
-        console.error("백엔드 데이터 검증 오류:", messages);
-        return "입력하신 정보를 다시 확인해 주세요.";
+        console.error("백엔드 데이터 검증 오류:", messages); // console = 콘솔에 출력하라
+                                                           // .error() = 에러 출력하라
+        return "입력하신 정보를 다시 확인해 주세요."; // return = 반환 후 종료하라
       }
     }
 
-    if (error.code === "ECONNABORTED") {
+    // 응답시간 초과 확인
+    if (error.code === "ECONNABORTED") { // error = axios 에러 객체
+                                         // .code = 오류 코드 저장
+                                         // ===   = ==보다 까다로운 확인(모든 조건이 같아야 함)
+                                         // ECONNABORTED = axios전용 오류코드
+                                         //                요청시간 초과시 나타나는 오류코드
       console.error("API 서버 응답 시간이 초과되었습니다.");
       return "검사 결과를 불러오는 데 시간이 오래 걸리고 있습니다. 잠시 후 다시 시도해 주세요.";
     }
 
-    if (!error.response) {
+    // 서버응답이 존재하지 않는가
+    if (!error.response) { // ! = not
+                           // error    = axios 에러 객체
+                           // response = HTTP 응답
+                           // 실행되는 경우: 서버를 실행하지 않거나 네트워크 오류, CORS 문제로 응답을 받지 못하였을 때
       console.error(
         "API 서버 연결 실패. 서버 실행 상태와 환경변수를 확인해 주세요.",
       );
       return "서비스에 연결할 수 없습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해 주세요.";
     }
 
-    console.error("HTTP 요청 실패:", error.response.status);
+    console.error("HTTP 요청 실패:", error.response.status); // error = axios 에러 객체
+                                                            // response = HTTP 응답
+                                                            // status   = HTTP 상태코드
     return `검사 진행 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요. (HTTP ${error.response.status})`;
+    // ``  = 템플릿 리터럴 작성
+    //       템플릿 리터럴: 문자열 안에 변수나 연산결과 직접 삽입
+    // ${} = 표현식 및 결과 삽입
   }
 
   console.error("예상하지 못한 오류가 발생했습니다:", error);
