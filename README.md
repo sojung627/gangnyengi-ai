@@ -278,13 +278,15 @@ XGBoost의 TreeExplainer와 평균 절대 SHAP 값으로 전처리된 예측 기
 
 ## 12. 실행 방법
 
-Python 3.12 및 Node.js 환경이 필요합니다. 학습 산출물이 없는 경우 원본 데이터를 내려받아 전처리 및 모델 학습부터 진행합니다.
+Python 3.12 및 Node.js 환경 필요  
+학습 산출물이 없는 경우 원본 데이터를 내려받아 전처리 및 모델 학습 필요 
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-NHANES XPT 파일 세 개를 `data/raw/`에 배치한 후 `notebooks/01_eda.ipynb`를 실행하여 병합 데이터를 생성합니다.
+NHANES XPT 파일 세 개를 `data/raw/`에 배치한 후 `notebooks/01_eda.ipynb`를 실행  
+이후 병합 데이터 생성
 
 ```bash
 python src/preprocessing.py
@@ -299,15 +301,13 @@ python src/evaluation.py
 python -m uvicorn main:app --app-dir backend --reload --port 8000
 ```
 
-프론트엔드(별도 터미널):
+프론트엔드:
 
 ```bash
-cd frontend
+cd frontend/
 npm install
 npm run dev
 ```
-
-환경변수 및 CORS 허용 출처는 로컬 실행 환경에 맞게 설정해야 합니다. 위 명령은 개발일지와 저장소 구조에 따른 실행 안내이며 이 문서 작성 시점에 새 환경에서 재현 검증하지 않았습니다.
 
 ### Docker 실행
 
