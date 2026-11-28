@@ -338,4 +338,4 @@ npm run dev
 
 ---
 
-데이터 출처: [CDC NHANES](https://wwwn.cdc.gov/nchs/nhanes/Default.aspx) · [GitHub 저장소](https://github.com/sojung627/gangnyengi-ai)
+데이터 출처: [CDC NHANES](https://wwwn.cdc.gov/nchs/nhanes/Default.aspx)
